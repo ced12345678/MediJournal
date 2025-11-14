@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Syringe, Pill, Stethoscope, HeartPulse, PlusCircle, Biohazard, HelpCircle } from 'lucide-react';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from './ui/dialog';
@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 import { Badge } from './ui/badge';
+import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 
 export const eventIcons = {
   Vaccination: Syringe,
@@ -142,24 +143,95 @@ const TimelineItem = ({ event, isLast }: { event: TimelineEvent; isLast: boolean
   );
 };
 
-const AddEventForm = ({ onAddEvent }: { onAddEvent: (event: Omit<TimelineEvent, 'id'>) => void }) => {
-    const [title, setTitle] = React.useState('');
-    const [date, setDate] = React.useState('');
-    const [age, setAge] = React.useState('');
-    const [description, setDescription] = React.useState('');
-    const [type, setType] = React.useState<EventType>('Other');
-    const [open, setOpen] = React.useState(false);
+const AddEventForm = ({
+  onAddEvent,
+  defaultEventType,
+}: {
+  onAddEvent: (event: Omit<TimelineEvent, 'id'> | Omit<TimelineEvent, 'id'>[]) => void,
+  defaultEventType?: EventType,
+}) => {
+    const [title, setTitle] = useState('');
+    const [date, setDate] = useState('');
+    const [age, setAge] = useState('');
+    const [description, setDescription] = useState('');
+    const [type, setType] = useState<EventType>(defaultEventType || 'Other');
+    const [open, setOpen] = useState(false);
+    
+    // New state for conditional Doctor Visit fields
+    const [visitType, setVisitType] = useState<'Casual Visit' | 'Serious Visit' | undefined>();
+    const [diseaseName, setDiseaseName] = useState('');
+    const [medicationsPrescribed, setMedicationsPrescribed] = useState('');
+    
+    // New state for Disease medication
+    const [medicationForDisease, setMedicationForDisease] = useState('');
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!title || !date || !type || !age) return;
-        onAddEvent({ title, date, description, type, age: parseInt(age) });
+
+    useEffect(() => {
+        if (defaultEventType) {
+            setType(defaultEventType);
+        }
+    }, [defaultEventType]);
+    
+    // Reset conditional fields when type changes
+    useEffect(() => {
+        if (type !== 'Doctor Visit') {
+            setVisitType(undefined);
+            setDiseaseName('');
+            setMedicationsPrescribed('');
+        }
+        if (type !== 'Disease') {
+            setMedicationForDisease('');
+        }
+    }, [type]);
+
+    const resetForm = () => {
         setTitle('');
         setDate('');
         setAge('');
         setDescription('');
-        setType('Other');
+        setType(defaultEventType || 'Other');
+        setVisitType(undefined);
+        setDiseaseName('');
+        setMedicationsPrescribed('');
+        setMedicationForDisease('');
         setOpen(false);
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!title || !date || !type || !age) return;
+        
+        let eventDetails: TimelineEvent['details'] = {};
+        if (type === 'Doctor Visit') {
+            eventDetails = {
+                visitType: visitType,
+                diseaseName: visitType === 'Serious Visit' ? diseaseName : undefined,
+                medicationsPrescribed: visitType === 'Serious Visit' ? medicationsPrescribed : undefined,
+            };
+            onAddEvent({ title, date, description, type, age: parseInt(age), details: eventDetails });
+        } else if (type === 'Disease' && medicationForDisease) {
+            const diseaseEvent: Omit<TimelineEvent, 'id'> = {
+                title,
+                date,
+                description: `${description} (Treated with ${medicationForDisease})`,
+                type: 'Disease',
+                age: parseInt(age),
+            };
+            const medicationEvent: Omit<TimelineEvent, 'id'> = {
+                title: medicationForDisease,
+                date,
+                description: `Prescribed for ${title}`,
+                type: 'Medication',
+                age: parseInt(age),
+                details: { status: 'Stopped' }
+            };
+             onAddEvent([diseaseEvent, medicationEvent]);
+        }
+        else {
+            onAddEvent({ title, date, description, type, age: parseInt(age), details: eventDetails });
+        }
+
+        resetForm();
     };
 
     return (
@@ -170,29 +242,29 @@ const AddEventForm = ({ onAddEvent }: { onAddEvent: (event: Omit<TimelineEvent, 
                     <span className="sr-only">Add Event</span>
                 </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="sm:max-w-[480px]">
                 <DialogHeader>
                     <DialogTitle>Add New Timeline Event</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
-                        <Label htmlFor="title">Title</Label>
-                        <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} required />
+                        <Label htmlFor="title-fab">Title / Reason</Label>
+                        <Input id="title-fab" value={title} onChange={(e) => setTitle(e.target.value)} required />
                     </div>
                      <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label htmlFor="date">Date</Label>
-                            <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+                            <Label htmlFor="date-fab">Date</Label>
+                            <Input id="date-fab" type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
                         </div>
                          <div className="space-y-2">
-                            <Label htmlFor="age">Age</Label>
-                            <Input id="age" type="number" value={age} onChange={(e) => setAge(e.target.value)} required />
+                            <Label htmlFor="age-fab">Age</Label>
+                            <Input id="age-fab" type="number" value={age} onChange={(e) => setAge(e.target.value)} required />
                         </div>
                     </div>
                      <div className="space-y-2">
-                        <Label htmlFor="type">Event Type</Label>
+                        <Label htmlFor="type-fab">Event Type</Label>
                         <Select onValueChange={(value) => setType(value as EventType)} value={type}>
-                            <SelectTrigger>
+                            <SelectTrigger id="type-fab">
                                 <SelectValue placeholder="Select an event type" />
                             </SelectTrigger>
                             <SelectContent>
@@ -202,9 +274,50 @@ const AddEventForm = ({ onAddEvent }: { onAddEvent: (event: Omit<TimelineEvent, 
                             </SelectContent>
                         </Select>
                     </div>
+
+                    {type === 'Doctor Visit' && (
+                        <div className="space-y-4 pt-4 border-t">
+                            <div className="space-y-2">
+                                <Label>Visit Type</Label>
+                                <RadioGroup value={visitType} onValueChange={(v) => setVisitType(v as 'Casual Visit' | 'Serious Visit')} className="flex gap-4">
+                                    <div className="flex items-center space-x-2">
+                                        <RadioGroupItem value="Casual Visit" id="casual-fab" />
+                                        <Label htmlFor="casual-fab">Casual Visit</Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <RadioGroupItem value="Serious Visit" id="serious-fab" />
+                                        <Label htmlFor="serious-fab">Serious Visit</Label>
+                                    </div>
+                                </RadioGroup>
+                            </div>
+                             {visitType === 'Serious Visit' && (
+                                <div className="space-y-4 pl-2 pt-2 border-l ml-2">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="diseaseName-fab">Disease Name</Label>
+                                        <Input id="diseaseName-fab" value={diseaseName} onChange={(e) => setDiseaseName(e.target.value)} placeholder="e.g., Influenza" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="medicationsPrescribed-fab">Medications Prescribed</Label>
+                                        <Input id="medicationsPrescribed-fab" value={medicationsPrescribed} onChange={(e) => setMedicationsPrescribed(e.target.value)} placeholder="e.g., Tamiflu" />
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                     {type === 'Disease' && (
+                        <div className="space-y-4 pt-4 border-t">
+                             <div className="space-y-2">
+                                <Label htmlFor="medicationForDisease-fab">Medication Prescribed (optional)</Label>
+                                <Input id="medicationForDisease-fab" value={medicationForDisease} onChange={(e) => setMedicationForDisease(e.target.value)} placeholder="e.g., Amoxicillin" />
+                                <p className="text-xs text-muted-foreground">If entered, this will also create an entry in the Medication section.</p>
+                            </div>
+                        </div>
+                    )}
+                    
                     <div className="space-y-2">
-                        <Label htmlFor="description">Description</Label>
-                        <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} />
+                        <Label htmlFor="description-fab">Description / Notes</Label>
+                        <Textarea id="description-fab" value={description} onChange={(e) => setDescription(e.target.value)} />
                     </div>
                     <DialogFooter>
                         <DialogClose asChild>
@@ -218,7 +331,7 @@ const AddEventForm = ({ onAddEvent }: { onAddEvent: (event: Omit<TimelineEvent, 
     )
 }
 
-export default function TimelineView({ events, onAddEvent }: { events: TimelineEvent[], onAddEvent: (event: Omit<TimelineEvent, 'id'>) => void }) {
+export default function TimelineView({ events, onAddEvent }: { events: TimelineEvent[], onAddEvent: (event: Omit<TimelineEvent, 'id'> | Omit<TimelineEvent, 'id'>[]) => void }) {
   
   const eventsByAge = useMemo(() => {
     const grouped: { [age: number]: TimelineEvent[] } = {};
@@ -291,3 +404,5 @@ export default function TimelineView({ events, onAddEvent }: { events: TimelineE
     </div>
   );
 }
+
+    
