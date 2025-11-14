@@ -71,7 +71,7 @@ const AddEventForm = ({
   defaultEventType,
   children,
 }: {
-  onAddEvent: (event: Omit<TimelineEvent, 'id'>) => void,
+  onAddEvent: (event: Omit<TimelineEvent, 'id'> | Omit<TimelineEvent, 'id'>[]) => void,
   defaultEventType?: EventType,
   children: React.ReactNode
 }) => {
@@ -86,6 +86,10 @@ const AddEventForm = ({
     const [visitType, setVisitType] = useState<'Casual Visit' | 'Serious Visit' | undefined>();
     const [diseaseName, setDiseaseName] = useState('');
     const [medicationsPrescribed, setMedicationsPrescribed] = useState('');
+    
+    // New state for Disease medication
+    const [medicationForDisease, setMedicationForDisease] = useState('');
+
 
     useEffect(() => {
         if (defaultEventType) {
@@ -100,6 +104,9 @@ const AddEventForm = ({
             setDiseaseName('');
             setMedicationsPrescribed('');
         }
+        if (type !== 'Disease') {
+            setMedicationForDisease('');
+        }
     }, [type]);
 
     const resetForm = () => {
@@ -111,6 +118,7 @@ const AddEventForm = ({
         setVisitType(undefined);
         setDiseaseName('');
         setMedicationsPrescribed('');
+        setMedicationForDisease('');
         setOpen(false);
     };
 
@@ -125,9 +133,29 @@ const AddEventForm = ({
                 diseaseName: visitType === 'Serious Visit' ? diseaseName : undefined,
                 medicationsPrescribed: visitType === 'Serious Visit' ? medicationsPrescribed : undefined,
             };
+            onAddEvent({ title, date, description, type, age: parseInt(age), details: eventDetails });
+        } else if (type === 'Disease' && medicationForDisease) {
+            const diseaseEvent: Omit<TimelineEvent, 'id'> = {
+                title,
+                date,
+                description: `${description} (Treated with ${medicationForDisease})`,
+                type: 'Disease',
+                age: parseInt(age),
+            };
+            const medicationEvent: Omit<TimelineEvent, 'id'> = {
+                title: medicationForDisease,
+                date,
+                description: `Prescribed for ${title}`,
+                type: 'Medication',
+                age: parseInt(age),
+                details: { status: 'Stopped' }
+            };
+             onAddEvent([diseaseEvent, medicationEvent]);
+        }
+        else {
+            onAddEvent({ title, date, description, type, age: parseInt(age), details: eventDetails });
         }
 
-        onAddEvent({ title, date, description, type, age: parseInt(age), details: eventDetails });
         resetForm();
     };
 
@@ -196,6 +224,16 @@ const AddEventForm = ({
                                     </div>
                                 </div>
                             )}
+                        </div>
+                    )}
+
+                     {type === 'Disease' && (
+                        <div className="space-y-4 pt-4 border-t">
+                             <div className="space-y-2">
+                                <Label htmlFor="medicationForDisease">Medication Prescribed (optional)</Label>
+                                <Input id="medicationForDisease" value={medicationForDisease} onChange={(e) => setMedicationForDisease(e.target.value)} placeholder="e.g., Amoxicillin" />
+                                <p className="text-xs text-muted-foreground">If entered, this will also create an entry in the Medication section.</p>
+                            </div>
                         </div>
                     )}
                     
@@ -283,7 +321,7 @@ function Medication({ events, onAddEvent }: { events: TimelineEvent[], onAddEven
     );
 }
 
-function Diseases({ events, onAddEvent }: { events: TimelineEvent[], onAddEvent: (event: Omit<TimelineEvent, 'id'>) => void }) {
+function Diseases({ events, onAddEvent }: { events: TimelineEvent[], onAddEvent: (event: Omit<TimelineEvent, 'id'> | Omit<TimelineEvent, 'id'>[]) => void }) {
     const diseases = events.filter(e => e.type === 'Disease').sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     return (
@@ -587,9 +625,12 @@ export default function HealthSyncApp() {
     }
   }, []);
 
-  const addEvent = (event: Omit<TimelineEvent, 'id'>) => {
-    const newEvent = { ...event, id: self.crypto.randomUUID() };
-    const updatedEvents = [...timelineEvents, newEvent]
+  const addEvent = (eventOrEvents: Omit<TimelineEvent, 'id'> | Omit<TimelineEvent, 'id'>[]) => {
+    const eventsToAdd = Array.isArray(eventOrEvents) ? eventOrEvents : [eventOrEvents];
+    
+    const newEvents = eventsToAdd.map(event => ({ ...event, id: self.crypto.randomUUID() }));
+
+    const updatedEvents = [...timelineEvents, ...newEvents]
     setTimelineEvents(updatedEvents);
     localStorage.setItem('healthsync-timeline', JSON.stringify(updatedEvents));
   }
@@ -662,3 +703,5 @@ export default function HealthSyncApp() {
     </div>
   );
 }
+
+    
