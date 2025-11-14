@@ -31,6 +31,7 @@ import { Textarea } from './ui/textarea';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
+import { ScrollArea } from './ui/scroll-area';
 
 
 const navItems = [
@@ -165,89 +166,91 @@ const AddEventForm = ({
                 {children}
             </DialogTrigger>
             <DialogContent className="sm:max-w-[480px]">
-                <DialogHeader>
+                 <DialogHeader>
                     <DialogTitle>Add New Timeline Event</DialogTitle>
                 </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="title">Title / Reason</Label>
-                        <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} required />
-                    </div>
-                     <div className="grid grid-cols-2 gap-4">
+                <ScrollArea className="max-h-[80vh] pr-6">
+                    <form onSubmit={handleSubmit} className="space-y-4 py-4">
                         <div className="space-y-2">
-                            <Label htmlFor="date">Date</Label>
-                            <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+                            <Label htmlFor="title">Title / Reason</Label>
+                            <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} required />
+                        </div>
+                         <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="date">Date</Label>
+                                <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+                            </div>
+                             <div className="space-y-2">
+                                <Label htmlFor="age">Age</Label>
+                                <Input id="age" type="number" value={age} onChange={(e) => setAge(e.target.value)} required />
+                            </div>
                         </div>
                          <div className="space-y-2">
-                            <Label htmlFor="age">Age</Label>
-                            <Input id="age" type="number" value={age} onChange={(e) => setAge(e.target.value)} required />
+                            <Label htmlFor="type">Event Type</Label>
+                            <Select onValueChange={(value) => setType(value as EventType)} value={type}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select an event type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {eventTypes.map(type => (
+                                        <SelectItem key={type} value={type}>{type}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
-                    </div>
-                     <div className="space-y-2">
-                        <Label htmlFor="type">Event Type</Label>
-                        <Select onValueChange={(value) => setType(value as EventType)} value={type}>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select an event type" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {eventTypes.map(type => (
-                                    <SelectItem key={type} value={type}>{type}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
 
-                    {type === 'Doctor Visit' && (
-                        <div className="space-y-4 pt-4 border-t">
-                            <div className="space-y-2">
-                                <Label>Visit Type</Label>
-                                <RadioGroup value={visitType} onValueChange={(v) => setVisitType(v as 'Casual Visit' | 'Serious Visit')} className="flex gap-4">
-                                    <div className="flex items-center space-x-2">
-                                        <RadioGroupItem value="Casual Visit" id="casual" />
-                                        <Label htmlFor="casual">Casual Visit</Label>
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                        <RadioGroupItem value="Serious Visit" id="serious" />
-                                        <Label htmlFor="serious">Serious Visit</Label>
-                                    </div>
-                                </RadioGroup>
-                            </div>
-                             {visitType === 'Serious Visit' && (
-                                <div className="space-y-4 pl-2 pt-2 border-l ml-2">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="diseaseName">Disease Name</Label>
-                                        <Input id="diseaseName" value={diseaseName} onChange={(e) => setDiseaseName(e.target.value)} placeholder="e.g., Influenza" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="medicationsPrescribed">Medications Prescribed</Label>
-                                        <Input id="medicationsPrescribed" value={medicationsPrescribed} onChange={(e) => setMedicationsPrescribed(e.target.value)} placeholder="e.g., Tamiflu" />
-                                    </div>
+                        {type === 'Doctor Visit' && (
+                            <div className="space-y-4 pt-4 border-t">
+                                <div className="space-y-2">
+                                    <Label>Visit Type</Label>
+                                    <RadioGroup value={visitType} onValueChange={(v) => setVisitType(v as 'Casual Visit' | 'Serious Visit')} className="flex gap-4">
+                                        <div className="flex items-center space-x-2">
+                                            <RadioGroupItem value="Casual Visit" id="casual" />
+                                            <Label htmlFor="casual">Casual Visit</Label>
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <RadioGroupItem value="Serious Visit" id="serious" />
+                                            <Label htmlFor="serious">Serious Visit</Label>
+                                        </div>
+                                    </RadioGroup>
                                 </div>
-                            )}
-                        </div>
-                    )}
-
-                     {type === 'Disease' && (
-                        <div className="space-y-4 pt-4 border-t">
-                             <div className="space-y-2">
-                                <Label htmlFor="medicationForDisease">Medication Prescribed (optional)</Label>
-                                <Input id="medicationForDisease" value={medicationForDisease} onChange={(e) => setMedicationForDisease(e.target.value)} placeholder="e.g., Amoxicillin" />
-                                <p className="text-xs text-muted-foreground">If entered, this will also create an entry in the Medication section.</p>
+                                 {visitType === 'Serious Visit' && (
+                                    <div className="space-y-4 pl-2 pt-2 border-l ml-2">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="diseaseName">Disease Name</Label>
+                                            <Input id="diseaseName" value={diseaseName} onChange={(e) => setDiseaseName(e.target.value)} placeholder="e.g., Influenza" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="medicationsPrescribed">Medications Prescribed</Label>
+                                            <Input id="medicationsPrescribed" value={medicationsPrescribed} onChange={(e) => setMedicationsPrescribed(e.target.value)} placeholder="e.g., Tamiflu" />
+                                        </div>
+                                    </div>
+                                )}
                             </div>
+                        )}
+
+                         {type === 'Disease' && (
+                            <div className="space-y-4 pt-4 border-t">
+                                 <div className="space-y-2">
+                                    <Label htmlFor="medicationForDisease">Medication Prescribed (optional)</Label>
+                                    <Input id="medicationForDisease" value={medicationForDisease} onChange={(e) => setMedicationForDisease(e.target.value)} placeholder="e.g., Amoxicillin" />
+                                    <p className="text-xs text-muted-foreground">If entered, this will also create an entry in the Medication section.</p>
+                                </div>
+                            </div>
+                        )}
+                        
+                        <div className="space-y-2">
+                            <Label htmlFor="description">Description / Notes</Label>
+                            <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} />
                         </div>
-                    )}
-                    
-                    <div className="space-y-2">
-                        <Label htmlFor="description">Description / Notes</Label>
-                        <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} />
-                    </div>
-                    <DialogFooter>
-                        <DialogClose asChild>
-                           <Button type="button" variant="ghost">Cancel</Button>
-                        </DialogClose>
-                        <Button type="submit">Add Event</Button>
-                    </DialogFooter>
-                </form>
+                        <DialogFooter className="pt-4">
+                            <DialogClose asChild>
+                               <Button type="button" variant="ghost">Cancel</Button>
+                            </DialogClose>
+                            <Button type="submit">Add Event</Button>
+                        </DialogFooter>
+                    </form>
+                </ScrollArea>
             </DialogContent>
         </Dialog>
     )
@@ -695,10 +698,14 @@ export default function HealthSyncApp() {
       <div className="flex flex-1 flex-col">
         <header className="flex items-center justify-between p-4 border-b">
             <h2 className="text-xl font-semibold">{activeItem.label}</h2>
-             {activeItem.id === 'timeline' && <AddEventForm onAddEvent={addEvent}><Button variant="outline">Add Event</Button></AddEventForm>}
         </header>
         <main className="flex-1 overflow-y-auto bg-secondary/50">
             {renderContent()}
+             {activeItem.id === 'timeline' && (
+              <div className="p-4 md:p-6 flex justify-end">
+                <AddEventForm onAddEvent={addEvent}><Button>Add Event</Button></AddEventForm>
+              </div>
+            )}
         </main>
       </div>
     </div>
