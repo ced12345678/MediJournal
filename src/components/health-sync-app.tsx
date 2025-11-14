@@ -11,6 +11,7 @@ import {
   Pill,
   Map,
   Sparkle,
+  Biohazard,
 } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
@@ -35,6 +36,7 @@ const navItems = [
   { id: 'timeline', label: 'Life', icon: Sparkle },
   { id: 'visits', label: 'Doctor Visits', icon: Stethoscope },
   { id: 'medication', label: 'Medication', icon: Pill },
+  { id: 'diseases', label: 'Diseases', icon: Biohazard },
   { id: 'history', label: 'History', icon: Users },
   { id: 'tips', label: 'SafeTravels', icon: Map },
   { id: 'sharing', label: 'Hospital Sharing', icon: Share2 },
@@ -201,6 +203,31 @@ function Medication({ events, onAddEvent }: { events: TimelineEvent[], onAddEven
             <div className="flex justify-end">
                  <AddEventForm onAddEvent={onAddEvent} defaultEventType="Medication">
                     <Button>Add Medication</Button>
+                </AddEventForm>
+            </div>
+        </div>
+    );
+}
+
+function Diseases({ events, onAddEvent }: { events: TimelineEvent[], onAddEvent: (event: Omit<TimelineEvent, 'id'>) => void }) {
+    const diseases = events.filter(e => e.type === 'Disease').sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    return (
+        <div className="p-4 md:p-6 space-y-4">
+            {diseases.map(disease => (
+                <Card key={disease.id}>
+                    <CardHeader>
+                        <CardTitle>{disease.title}</CardTitle>
+                        <CardDescription>Diagnosed: {new Date(disease.date).toLocaleDateString()} (Age {disease.age})</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-sm">{disease.description}</p>
+                    </CardContent>
+                </Card>
+            ))}
+            <div className="flex justify-end">
+                <AddEventForm onAddEvent={onAddEvent} defaultEventType="Disease">
+                    <Button>Add Disease</Button>
                 </AddEventForm>
             </div>
         </div>
@@ -376,6 +403,8 @@ export default function HealthSyncApp() {
         return <DoctorVisits events={timelineEvents} onAddEvent={addEvent} />;
       case 'medication':
         return <Medication events={timelineEvents} onAddEvent={addEvent} />;
+      case 'diseases':
+        return <Diseases events={timelineEvents} onAddEvent={addEvent} />;
       case 'history':
         return <History />;
       case 'account':

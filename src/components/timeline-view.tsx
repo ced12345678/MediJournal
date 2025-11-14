@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { Syringe, Pill, Stethoscope, HeartPulse, PlusCircle, Ruler, Weight } from 'lucide-react';
+import { Syringe, Pill, Stethoscope, HeartPulse, PlusCircle, Ruler, Weight, Biohazard } from 'lucide-react';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from './ui/dialog';
 import { Input } from './ui/input';
@@ -15,6 +15,7 @@ export const eventIcons = {
   Vaccination: Syringe,
   Medication: Pill,
   'Doctor Visit': Stethoscope,
+  Disease: Biohazard,
   Measurement: Ruler,
   Other: HeartPulse
 };
@@ -57,6 +58,11 @@ export const initialEvents: TimelineEvent[] = [
         id: '4', age: 6, date: '2005-09-10', title: 'Broken Arm',
         description: 'Fell from monkey bars, resulting in a fractured left radius. Cast for 6 weeks.',
         type: 'Doctor Visit',
+    },
+     {
+        id: '12', age: 7, date: '2006-11-01', title: 'Chickenpox',
+        description: 'Contracted chickenpox. Recovered after two weeks of rest.',
+        type: 'Disease',
     },
     {
         id: '5', age: 11, date: '2010-08-20', title: 'Tdap & HPV Vaccine',
