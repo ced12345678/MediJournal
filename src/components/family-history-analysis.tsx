@@ -9,8 +9,9 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Terminal, Sparkles, Loader2, Send, User, Bot } from "lucide-react";
 import type { AnalyzeFamilyHistoryOutput } from "@/ai/flows/analyze-family-history-for-risk-factors";
 import { ScrollArea } from "./ui/scroll-area";
-import { cn } from "@/lib/utils";
+import { cn, getNamespacedKey } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "./ui/avatar";
+import { useAuth } from "@/hooks/use-auth";
 
 type ChatMessage = {
   role: 'user' | 'assistant';
@@ -24,6 +25,7 @@ type AnalysisState = {
 };
 
 export default function FamilyHistoryAnalysis() {
+  const { user } = useAuth();
   const [isPending, startTransition] = useTransition();
   const [analysisState, setAnalysisState] = useState<AnalysisState>({ data: null, error: null, isAnalyzing: false });
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -31,14 +33,16 @@ export default function FamilyHistoryAnalysis() {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (!user) return;
     try {
-      const storedHistory = localStorage.getItem('healthsync-familyHistory');
+      const storageKey = getNamespacedKey('familyHistory', user.id);
+      const storedHistory = localStorage.getItem(storageKey);
       if (storedHistory) {
         const { messages: storedMessages, analysis } = JSON.parse(storedHistory);
         setMessages(storedMessages || []);
         if (analysis) {
           setAnalysisState({ data: analysis, error: null, isAnalyzing: false });
-        } else if (storedMessages.length === 0) {
+        } else if (!storedMessages || storedMessages.length === 0) {
             fetchInitialMessage();
         }
       } else {
@@ -48,7 +52,7 @@ export default function FamilyHistoryAnalysis() {
       console.error("Failed to parse from localStorage", error);
       fetchInitialMessage();
     }
-  }, []);
+  }, [user]);
 
   const fetchInitialMessage = () => {
     startTransition(async () => {
@@ -67,12 +71,14 @@ export default function FamilyHistoryAnalysis() {
   }, [messages, isPending]);
 
   const updateLocalStorage = (msgs: ChatMessage[], analysis: AnalyzeFamilyHistoryOutput | null) => {
-    localStorage.setItem('healthsync-familyHistory', JSON.stringify({ messages: msgs, analysis }));
+    if (!user) return;
+    const storageKey = getNamespacedKey('familyHistory', user.id);
+    localStorage.setItem(storageKey, JSON.stringify({ messages: msgs, analysis }));
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isPending) return;
+    if (!input.trim() || isPending || !user) return;
 
     const userMessage: ChatMessage = { role: 'user', content: input };
     const newMessages = [...messages, userMessage];
@@ -98,6 +104,7 @@ export default function FamilyHistoryAnalysis() {
   };
   
   const handleFinalizeAnalysis = () => {
+    if (!user) return;
     setAnalysisState({ data: null, error: null, isAnalyzing: true });
     startTransition(async () => {
         const fullHistory = messages.map(m => `${m.role}: ${m.content}`).join('\n');
@@ -110,9 +117,10 @@ export default function FamilyHistoryAnalysis() {
   }
 
   const handleReset = () => {
+    if (!user) return;
     setMessages([]);
     setAnalysisState({ data: null, error: null, isAnalyzing: false });
-    localStorage.removeItem('healthsync-familyHistory');
+    localStorage.removeItem(getNamespacedKey('familyHistory', user.id));
     fetchInitialMessage();
   }
 

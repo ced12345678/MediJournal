@@ -9,32 +9,33 @@ import { useToast } from '@/hooks/use-toast';
 import { Share2, FileDown } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import type { TimelineEvent } from './timeline-view';
+import { useAuth } from '@/hooks/use-auth';
+import { getNamespacedKey } from '@/lib/utils';
 
 // Extend jsPDF with autoTable
 interface jsPDFWithAutoTable extends jsPDF {
     autoTable: (options: any) => jsPDF;
 }
 
-type AllData = {
-    personalInfo: Record<string, string | null>;
-    timeline: TimelineEvent[];
-    familyHistory: any;
-    travelHistory: any;
-};
-
 export default function HospitalSharing() {
+    const { user } = useAuth();
     const { toast } = useToast();
 
     const generatePdf = () => {
+        if (!user) {
+            toast({ variant: 'destructive', title: 'Error', description: 'You must be logged in to generate a PDF.' });
+            return;
+        }
+
         const personalInfo = {
-            name: localStorage.getItem('healthsync-name') || 'N/A',
-            age: localStorage.getItem('healthsync-age') || 'N/A',
-            height: localStorage.getItem('healthsync-height') || 'N/A',
-            weight: localStorage.getItem('healthsync-weight') || 'N/A',
+            name: user.name || 'N/A',
+            age: localStorage.getItem(getNamespacedKey('age', user.id)) || 'N/A',
+            height: localStorage.getItem(getNamespacedKey('height', user.id)) || 'N/A',
+            weight: localStorage.getItem(getNamespacedKey('weight', user.id)) || 'N/A',
         };
-        const timeline: TimelineEvent[] = JSON.parse(localStorage.getItem('healthsync-timeline') || '[]');
-        const familyHistory = JSON.parse(localStorage.getItem('healthsync-familyHistory') || '{}');
-        const travelHistory = JSON.parse(localStorage.getItem('healthsync-travelHistory') || '[]');
+        const timeline: TimelineEvent[] = JSON.parse(localStorage.getItem(getNamespacedKey('timeline', user.id)) || '[]');
+        const familyHistory = JSON.parse(localStorage.getItem(getNamespacedKey('familyHistory', user.id)) || '{}');
+        const travelHistory = JSON.parse(localStorage.getItem(getNamespacedKey('travelHistory', user.id)) || '[]');
         
         const doc = new jsPDF() as jsPDFWithAutoTable;
 
@@ -63,6 +64,10 @@ export default function HospitalSharing() {
 
         const addSection = (title: string, data: any[], columns: any[], mapper: (item: any) => any[]) => {
             if (data.length > 0) {
+                if (lastY > 250) { // Add new page if content is getting long
+                    doc.addPage();
+                    lastY = 20;
+                }
                 doc.setFontSize(16);
                 doc.text(title, 14, lastY);
                 doc.autoTable({
@@ -103,6 +108,10 @@ export default function HospitalSharing() {
         ]);
 
         if (familyHistory?.analysis?.riskFactors) {
+            if (lastY > 250) {
+                doc.addPage();
+                lastY = 20;
+            }
             doc.setFontSize(16);
             doc.text("Family History AI Summary", 14, lastY);
             doc.setFontSize(10);

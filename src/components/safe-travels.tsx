@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useTransition } from 'react';
+import React, { useState, useTransition, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,8 @@ import { z } from 'zod';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { Loader2, Sparkles, Siren, Shield, Heart, Map } from 'lucide-react';
 import { Badge } from './ui/badge';
-import { cn } from '@/lib/utils';
+import { cn, getNamespacedKey } from '@/lib/utils';
+import { useAuth } from '@/hooks/use-auth';
 
 
 const TipSchema = z.object({
@@ -48,9 +49,20 @@ const severityColors = {
 }
 
 export default function SafeTravels() {
+  const { user } = useAuth();
+  const [age, setAge] = useState(30); // Default age
   const [location, setLocation] = useState('');
   const [state, setState] = useState<HealthTipsState>({ data: null, error: null, isLoading: false });
   const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    if (user) {
+        const storedAge = localStorage.getItem(getNamespacedKey('age', user.id));
+        if (storedAge) {
+            setAge(parseInt(storedAge, 10));
+        }
+    }
+  }, [user]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,7 +71,7 @@ export default function SafeTravels() {
     setState({ data: null, error: null, isLoading: true });
 
     startTransition(async () => {
-      const result = await generateHealthTipsAction({ location: location, age: 25 }); // Assuming age 25 for now
+      const result = await generateHealthTipsAction({ location: location, age: age });
       setState({ data: result.data, error: result.error, isLoading: false });
     });
   };
@@ -69,7 +81,7 @@ export default function SafeTravels() {
       <Card>
         <CardHeader>
           <CardTitle>SafeTravels</CardTitle>
-          <CardDescription>Enter your destination to get AI-powered travel health recommendations.</CardDescription>
+          <CardDescription>Enter your destination to get AI-powered travel health recommendations based on your age.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2">

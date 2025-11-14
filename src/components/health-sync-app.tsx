@@ -12,6 +12,7 @@ import {
   Map,
   Sparkle,
   Biohazard,
+  LogOut,
 } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
@@ -33,6 +34,8 @@ import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { ScrollArea } from './ui/scroll-area';
+import { useAuth } from '@/hooks/use-auth';
+import { getNamespacedKey } from '@/lib/utils';
 
 
 const navItems = [
@@ -449,6 +452,7 @@ const AddTravelRecordForm = ({ onAdd }: { onAdd: (record: Omit<TravelRecord, 'id
 }
 
 function History() {
+    const { user } = useAuth();
     const initialPlaces: TravelRecord[] = [
         {id: '1', location: 'Mexico', year: '2022', duration: '1 week', notes: 'Vacation, no health issues.'},
         {id: '2', location: 'India', year: '2019', duration: '3 weeks', notes: 'Work trip, received Typhoid vaccine before travel.'}
@@ -456,25 +460,28 @@ function History() {
     const [places, setPlaces] = useState<TravelRecord[]>([]);
 
     useEffect(() => {
+        if (!user) return;
         try {
-            const storedPlaces = localStorage.getItem('healthsync-travelHistory');
+            const key = getNamespacedKey('travelHistory', user.id);
+            const storedPlaces = localStorage.getItem(key);
             if (storedPlaces) {
                 setPlaces(JSON.parse(storedPlaces));
             } else {
                 setPlaces(initialPlaces);
-                localStorage.setItem('healthsync-travelHistory', JSON.stringify(initialPlaces));
+                localStorage.setItem(key, JSON.stringify(initialPlaces));
             }
         } catch (error) {
             console.error("Failed to parse travel history from localStorage", error);
             setPlaces(initialPlaces);
         }
-    }, [])
+    }, [user])
 
     const addTravelRecord = (record: Omit<TravelRecord, 'id'>) => {
+        if (!user) return;
         const newRecord = { ...record, id: self.crypto.randomUUID() };
         const updatedPlaces = [...places, newRecord];
         setPlaces(updatedPlaces);
-        localStorage.setItem('healthsync-travelHistory', JSON.stringify(updatedPlaces));
+        localStorage.setItem(getNamespacedKey('travelHistory', user.id), JSON.stringify(updatedPlaces));
     }
 
     return (
@@ -511,45 +518,52 @@ function History() {
 }
 
 function AccountSection() {
+    const { user, logout } = useAuth();
     const { toast } = useToast();
-    const [userId, setUserId] = React.useState('');
-    const [name, setName] = React.useState('John Doe');
-    const [age, setAge] = React.useState('34');
-    const [height, setHeight] = React.useState("6'0\"");
-    const [weight, setWeight] = React.useState("175 lbs");
+    
+    const [name, setName] = React.useState('');
+    const [age, setAge] = React.useState('');
+    const [height, setHeight] = React.useState("");
+    const [weight, setWeight] = React.useState("");
 
     React.useEffect(() => {
-      let id = localStorage.getItem('healthsync-userId');
-      if (!id) {
-        id = `user_${self.crypto.randomUUID()}`;
-        localStorage.setItem('healthsync-userId', id);
-      }
-      setUserId(id);
-      
-      const storedName = localStorage.getItem('healthsync-name');
-      if (storedName) setName(storedName);
-      const storedAge = localStorage.getItem('healthsync-age');
-      if (storedAge) setAge(storedAge);
-      const storedHeight = localStorage.getItem('healthsync-height');
-      if (storedHeight) setHeight(storedHeight);
-      const storedWeight = localStorage.getItem('healthsync-weight');
-      if (storedWeight) setWeight(storedWeight);
+        if (!user) return;
 
-    }, []);
+        setName(user.name);
+
+        const storedAge = localStorage.getItem(getNamespacedKey('age', user.id));
+        if (storedAge) setAge(storedAge);
+        const storedHeight = localStorage.getItem(getNamespacedKey('height', user.id));
+        if (storedHeight) setHeight(storedHeight);
+        const storedWeight = localStorage.getItem(getNamespacedKey('weight', user.id));
+        if (storedWeight) setWeight(storedWeight);
+
+    }, [user]);
 
     const handleSave = () => {
-        localStorage.setItem('healthsync-name', name);
-        localStorage.setItem('healthsync-age', age);
-        localStorage.setItem('healthsync-height', height);
-        localStorage.setItem('healthsync-weight', weight);
+        if (!user) return;
+        localStorage.setItem(getNamespacedKey('age', user.id), age);
+        localStorage.setItem(getNamespacedKey('height', user.id), height);
+        localStorage.setItem(getNamespacedKey('weight', user.id), weight);
         toast({ title: "Account Updated", description: "Your details have been saved." });
     }
 
     const handleDelete = () => {
-      localStorage.clear();
-      toast({ variant: "destructive", title: "All Data Deleted", description: "All your data has been permanently deleted."});
-      setTimeout(() => window.location.reload(), 1000);
+      if (!user) return;
+      // This is a simplified example. In a real app, you'd want a more robust way to delete user data.
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith(`healthsync-${user.id}-`)) {
+          localStorage.removeItem(key);
+        }
+      });
+      // Also remove family history which has a different key structure
+      localStorage.removeItem(getNamespacedKey('familyHistory', user.id));
+      
+      toast({ variant: "destructive", title: "All Data Deleted", description: "All your health data has been permanently deleted."});
+      // We don't reload, logout will redirect
     }
+
+    if (!user) return null;
 
     return (
         <div className="p-4 md:p-6">
@@ -560,13 +574,13 @@ function AccountSection() {
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <div className="space-y-2">
-                        <Label>User ID</Label>
-                        <p className="font-mono text-sm bg-muted p-2 rounded-md break-all">{userId}</p>
+                        <Label>Username</Label>
+                        <p className="font-mono text-sm bg-muted p-2 rounded-md break-all">{user.username}</p>
                     </div>
                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                          <div className="space-y-2">
                             <Label htmlFor="name">Name</Label>
-                            <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
+                            <Input id="name" value={name} disabled />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="age">Age</Label>
@@ -581,17 +595,21 @@ function AccountSection() {
                             <Input id="weight" value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="e.g., 175 lbs"/>
                         </div>
                     </div>
-                    <div className="flex flex-col sm:flex-row gap-2 pt-2">
+                    <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t">
                         <Button onClick={handleSave}>Save Changes</Button>
+                        <Button variant="outline" onClick={logout}>
+                            <LogOut className="mr-2 h-4 w-4" />
+                            Log Out
+                        </Button>
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
-                                <Button variant="destructive">Delete All Data & Reset</Button>
+                                <Button variant="destructive">Delete All Data</Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                                 <AlertDialogHeader>
                                     <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                                     <AlertDialogDescription>
-                                        This action cannot be undone. This will permanently delete all your data from this browser and reset the application.
+                                        This action cannot be undone. This will permanently delete all your health data from this browser. Your account will not be deleted.
                                     </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
@@ -643,34 +661,38 @@ const NavContent = ({
 );
 
 export default function HealthSyncApp() {
+  const { user } = useAuth();
   const [activeItem, setActiveItem] = useState<NavItem>(navItems[0]);
   const isMobile = useIsMobile();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
 
   useEffect(() => {
+    if (!user) return;
     try {
-      const storedEvents = localStorage.getItem('healthsync-timeline');
+      const key = getNamespacedKey('timeline', user.id);
+      const storedEvents = localStorage.getItem(key);
       if (storedEvents) {
         setTimelineEvents(JSON.parse(storedEvents));
       } else {
         setTimelineEvents(initialEvents);
-        localStorage.setItem('healthsync-timeline', JSON.stringify(initialEvents));
+        localStorage.setItem(key, JSON.stringify(initialEvents));
       }
     } catch (error) {
       console.error("Failed to parse timeline events from localStorage", error);
       setTimelineEvents(initialEvents);
     }
-  }, []);
+  }, [user]);
 
   const addEvent = (eventOrEvents: Omit<TimelineEvent, 'id'> | Omit<TimelineEvent, 'id'>[]) => {
+    if (!user) return;
     const eventsToAdd = Array.isArray(eventOrEvents) ? eventOrEvents : [eventOrEvents];
     
     const newEvents = eventsToAdd.map(event => ({ ...event, id: self.crypto.randomUUID() }));
 
     const updatedEvents = [...timelineEvents, ...newEvents]
     setTimelineEvents(updatedEvents);
-    localStorage.setItem('healthsync-timeline', JSON.stringify(updatedEvents));
+    localStorage.setItem(getNamespacedKey('timeline', user.id), JSON.stringify(updatedEvents));
   }
   
   const renderContent = () => {
