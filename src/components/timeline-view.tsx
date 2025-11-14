@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Syringe, Pill, Stethoscope, HeartPulse, PlusCircle, Weight, Ruler } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from './ui/button';
@@ -62,6 +62,11 @@ const initialEvents: TimelineEvent[] = [
         description: 'Routine physical. All vitals normal.',
         type: 'Doctor Visit',
     },
+    {
+        id: '6', age: 10, date: '2010-03-22', title: 'Chickenpox',
+        description: 'Contracted chickenpox. Recovered fully.',
+        type: 'Other',
+    },
 ];
 
 const TimelineItem = ({ event, isLast }: { event: TimelineEvent; isLast: boolean }) => {
@@ -81,7 +86,7 @@ const TimelineItem = ({ event, isLast }: { event: TimelineEvent; isLast: boolean
             <div className="flex justify-between items-start">
                 <div>
                     <CardTitle className="text-lg font-semibold">{event.title}</CardTitle>
-                    <p className="text-sm font-medium text-muted-foreground">Age {event.age} &bull; {new Date(event.date).toLocaleDateString()}</p>
+                    <p className="text-sm font-medium text-muted-foreground">{new Date(event.date).toLocaleDateString()}</p>
                 </div>
                 <div className="text-sm font-bold text-primary bg-primary/10 px-3 py-1 rounded-full">{event.type}</div>
             </div>
@@ -123,9 +128,9 @@ const AddEventForm = ({ onAddEvent }: { onAddEvent: (event: Omit<TimelineEvent, 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button>
-                    <PlusCircle className="mr-2" />
-                    Add Event
+                <Button className="fixed bottom-8 right-8 h-16 w-16 rounded-full shadow-lg z-10">
+                    <PlusCircle className="h-8 w-8" />
+                    <span className="sr-only">Add Event</span>
                 </Button>
             </DialogTrigger>
             <DialogContent>
@@ -178,6 +183,7 @@ const AddEventForm = ({ onAddEvent }: { onAddEvent: (event: Omit<TimelineEvent, 
 
 export default function TimelineView() {
   const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
+  const [selectedAge, setSelectedAge] = useState<number | null>(null);
   
   useEffect(() => {
     try {
@@ -185,36 +191,72 @@ export default function TimelineView() {
       if (storedEvents) {
         setTimelineEvents(JSON.parse(storedEvents));
       } else {
-        const sortedInitial = initialEvents.sort((a,b) => b.age - a.age);
-        setTimelineEvents(sortedInitial);
-        localStorage.setItem('healthsync-timeline', JSON.stringify(sortedInitial));
+        setTimelineEvents(initialEvents);
+        localStorage.setItem('healthsync-timeline', JSON.stringify(initialEvents));
       }
     } catch (error) {
       console.error("Failed to parse timeline events from localStorage", error);
-      const sortedInitial = initialEvents.sort((a,b) => b.age - a.age);
-      setTimelineEvents(sortedInitial);
+      setTimelineEvents(initialEvents);
     }
   }, []);
 
   const addEvent = (event: Omit<TimelineEvent, 'id'>) => {
     const newEvent = { ...event, id: self.crypto.randomUUID() };
-    const updatedEvents = [...timelineEvents, newEvent].sort((a,b) => b.age - a.age);
+    const updatedEvents = [...timelineEvents, newEvent]
     setTimelineEvents(updatedEvents);
     localStorage.setItem('healthsync-timeline', JSON.stringify(updatedEvents));
   }
 
+  const ages = useMemo(() => {
+    const uniqueAges = [...new Set(timelineEvents.map(e => e.age))];
+    return uniqueAges.sort((a,b) => a - b);
+  }, [timelineEvents]);
+
+  const filteredEvents = useMemo(() => {
+    if (selectedAge === null) return [];
+    return timelineEvents
+      .filter(e => e.age === selectedAge)
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }, [timelineEvents, selectedAge]);
+
+  useEffect(() => {
+    if (ages.length > 0 && selectedAge === null) {
+      setSelectedAge(ages[ages.length - 1]);
+    }
+  }, [ages, selectedAge]);
+
+
   return (
-    <div className="p-4 md:p-6 lg:p-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex justify-end mb-6">
-            <AddEventForm onAddEvent={addEvent} />
+    <div className="p-4 md:p-6 lg:p-8 relative">
+        <AddEventForm onAddEvent={addEvent} />
+        <div className="max-w-4xl mx-auto">
+            <div className="flex flex-wrap items-center justify-center gap-4 mb-8">
+                {ages.map(age => (
+                    <Button
+                        key={age}
+                        variant={selectedAge === age ? 'default' : 'outline'}
+                        className="rounded-full h-12 w-12 text-lg"
+                        onClick={() => setSelectedAge(age)}
+                    >
+                        {age}
+                    </Button>
+                ))}
+            </div>
+            {selectedAge !== null && (
+                <div>
+                     <h2 className="text-2xl font-bold text-center mb-6">Events at Age {selectedAge}</h2>
+                     {filteredEvents.length > 0 ? (
+                        <div className="relative">
+                            {filteredEvents.map((event, index) => (
+                                <TimelineItem key={event.id} event={event} isLast={index === filteredEvents.length - 1} />
+                            ))}
+                        </div>
+                     ) : (
+                        <p className="text-center text-muted-foreground">No events recorded for this age.</p>
+                     )}
+                </div>
+            )}
         </div>
-        <div className="relative">
-          {timelineEvents.map((event, index) => (
-            <TimelineItem key={event.id} event={event} isLast={index === timelineEvents.length - 1} />
-          ))}
-        </div>
-      </div>
     </div>
   );
 }

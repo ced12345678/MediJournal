@@ -11,6 +11,7 @@ import {
   Clock,
   Pill,
   Map,
+  Sparkle,
 } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
@@ -25,7 +26,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Badge } from './ui/badge';
 
 const navItems = [
-  { id: 'timeline', label: 'Agewise Timeline', icon: Clock },
+  { id: 'timeline', label: 'Life', icon: Sparkle },
   { id: 'visits', label: 'Doctor Visits', icon: Stethoscope },
   { id: 'medication', label: 'Medication', icon: Pill },
   { id: 'history', label: 'History', icon: Users },
@@ -314,5 +315,3 @@ export default function HealthSyncApp() {
     </div>
   );
 }
-
-    
