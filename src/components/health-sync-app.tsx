@@ -92,10 +92,10 @@ const AddEventForm = ({
 
 
     useEffect(() => {
-        if (defaultEventType) {
+        if (open && defaultEventType) {
             setType(defaultEventType);
         }
-    }, [defaultEventType]);
+    }, [open, defaultEventType]);
     
     // Reset conditional fields when type changes
     useEffect(() => {
@@ -253,7 +253,7 @@ const AddEventForm = ({
     )
 }
 
-function DoctorVisits({ events, onAddEvent }: { events: TimelineEvent[], onAddEvent: (event: Omit<TimelineEvent, 'id'>) => void }) {
+function DoctorVisits({ events, onAddEvent }: { events: TimelineEvent[], onAddEvent: (event: Omit<TimelineEvent, 'id'> | Omit<TimelineEvent, 'id'>[]) => void }) {
     const visits = events.filter(e => e.type === 'Doctor Visit').sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     return (
@@ -289,7 +289,7 @@ function DoctorVisits({ events, onAddEvent }: { events: TimelineEvent[], onAddEv
     );
 }
 
-function Medication({ events, onAddEvent }: { events: TimelineEvent[], onAddEvent: (event: Omit<TimelineEvent, 'id'>) => void }) {
+function Medication({ events, onAddEvent }: { events: TimelineEvent[], onAddEvent: (event: Omit<TimelineEvent, 'id'> | Omit<TimelineEvent, 'id'>[]) => void }) {
      const medications = events.filter(e => e.type === 'Medication').sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     return (
@@ -695,6 +695,7 @@ export default function HealthSyncApp() {
       <div className="flex flex-1 flex-col">
         <header className="flex items-center justify-between p-4 border-b">
             <h2 className="text-xl font-semibold">{activeItem.label}</h2>
+             {activeItem.id === 'timeline' && <AddEventForm onAddEvent={addEvent}><Button variant="outline">Add Event</Button></AddEventForm>}
         </header>
         <main className="flex-1 overflow-y-auto bg-secondary/50">
             {renderContent()}
@@ -703,5 +704,3 @@ export default function HealthSyncApp() {
     </div>
   );
 }
-
-    
