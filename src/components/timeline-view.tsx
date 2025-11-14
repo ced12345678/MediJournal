@@ -214,6 +214,9 @@ export default function TimelineView({ events, onAddEvent }: { events: TimelineE
                         <Accordion type="single" collapsible className="w-full">
                             {sortedAges.map(age => {
                                 const ageEvents = eventsByAge[age];
+                                if (!ageEvents || ageEvents.length === 0) {
+                                    return null;
+                                }
                                 const eventSummary = ageEvents.map(e => e.type).slice(0, 3).join(', ') + (ageEvents.length > 3 ? '...' : '');
                                 return (
                                     <AccordionItem value={`age-${age}`} key={age}>
