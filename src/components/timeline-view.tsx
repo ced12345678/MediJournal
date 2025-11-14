@@ -1,15 +1,15 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { Syringe, Pill, Stethoscope, HeartPulse, PlusCircle, Weight, Ruler } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import React, { useMemo } from 'react';
+import { Syringe, Pill, Stethoscope, HeartPulse, PlusCircle, Ruler, Weight } from 'lucide-react';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from './ui/dialog';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 
 export const eventIcons = {
   Vaccination: Syringe,
@@ -74,46 +74,41 @@ export const initialEvents: TimelineEvent[] = [
 const TimelineItem = ({ event, isLast }: { event: TimelineEvent; isLast: boolean }) => {
   const Icon = eventIcons[event.type] || HeartPulse;
   return (
-    <div className="relative pl-12 py-4 group">
+    <div className="relative pl-12 py-3 group">
       {!isLast && <div className="absolute left-5 top-0 h-full w-0.5 bg-border -translate-x-1/2" />}
       
-      <div className="absolute left-5 top-5 -translate-x-1/2 -translate-y-1/2">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground">
+      <div className="absolute left-5 top-4 -translate-x-1/2 -translate-y-1/2">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/20 text-primary border-2 border-primary/30">
           <Icon className="h-5 w-5" />
         </div>
       </div>
       
-      <Card>
-        <CardHeader>
-            <div className="flex justify-between items-start">
-                <div>
-                    <CardTitle className="text-lg font-semibold">{event.title}</CardTitle>
-                    <p className="text-sm font-medium text-muted-foreground">{new Date(event.date).toLocaleDateString()}</p>
-                </div>
-                <div className="text-sm font-bold text-primary bg-primary/10 px-3 py-1 rounded-full">{event.type}</div>
-            </div>
-        </CardHeader>
-        <CardContent>
-            <p className="text-sm text-foreground/80 mb-2">{event.description}</p>
-            {event.details && (
-                 <div className="flex gap-4 pt-2 border-t mt-2">
-                    {event.details.height && <div className="flex items-center gap-2 text-sm"><Ruler className="w-4 h-4 text-muted-foreground" /> <span>{event.details.height}</span></div>}
-                    {event.details.weight && <div className="flex items-center gap-2 text-sm"><Weight className="w-4 h-4 text-muted-foreground" /> <span>{event.details.weight}</span></div>}
-                 </div>
-            )}
-        </CardContent>
-      </Card>
+      <div className="ml-4">
+        <p className="font-semibold text-md">{event.title}</p>
+        <p className="text-sm text-muted-foreground">{new Date(event.date).toLocaleDateString()}</p>
+        <p className="text-sm text-foreground/80 mt-1">{event.description}</p>
+        <div className="flex items-center gap-2 mt-1">
+             <div className="text-xs font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">{event.type}</div>
+             {event.details?.status && <div className="text-xs font-medium bg-muted px-2 py-0.5 rounded-full">{event.details.status}</div>}
+        </div>
+        {event.details && (
+             <div className="flex gap-4 pt-2 mt-2">
+                {event.details.height && <div className="flex items-center gap-2 text-sm"><Ruler className="w-4 h-4 text-muted-foreground" /> <span>{event.details.height}</span></div>}
+                {event.details.weight && <div className="flex items-center gap-2 text-sm"><Weight className="w-4 h-4 text-muted-foreground" /> <span>{event.details.weight}</span></div>}
+             </div>
+        )}
+      </div>
     </div>
   );
 };
 
 const AddEventForm = ({ onAddEvent }: { onAddEvent: (event: Omit<TimelineEvent, 'id'>) => void }) => {
-    const [title, setTitle] = useState('');
-    const [date, setDate] = useState('');
-    const [age, setAge] = useState('');
-    const [description, setDescription] = useState('');
-    const [type, setType] = useState<EventType>('Other');
-    const [open, setOpen] = useState(false);
+    const [title, setTitle] = React.useState('');
+    const [date, setDate] = React.useState('');
+    const [age, setAge] = React.useState('');
+    const [description, setDescription] = React.useState('');
+    const [type, setType] = React.useState<EventType>('Other');
+    const [open, setOpen] = React.useState(false);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -184,60 +179,72 @@ const AddEventForm = ({ onAddEvent }: { onAddEvent: (event: Omit<TimelineEvent, 
 }
 
 export default function TimelineView({ events, onAddEvent }: { events: TimelineEvent[], onAddEvent: (event: Omit<TimelineEvent, 'id'>) => void }) {
-  const [selectedAge, setSelectedAge] = useState<number | null>(null);
   
-  const ages = useMemo(() => {
-    const uniqueAges = [...new Set(events.map(e => e.age))];
-    return uniqueAges.sort((a,b) => a - b);
+  const eventsByAge = useMemo(() => {
+    const grouped: { [age: number]: TimelineEvent[] } = {};
+    events.forEach(event => {
+      if (!grouped[event.age]) {
+        grouped[event.age] = [];
+      }
+      grouped[event.age].push(event);
+    });
+    // Sort events within each age group chronologically
+    for (const age in grouped) {
+      grouped[age].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    }
+    return grouped;
   }, [events]);
 
-  const filteredEvents = useMemo(() => {
-    if (selectedAge === null) return [];
-    return events
-      .filter(e => e.age === selectedAge)
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  }, [events, selectedAge]);
-
-  useEffect(() => {
-    if (ages.length > 0 && selectedAge === null) {
-      setSelectedAge(ages[ages.length - 1]);
-    }
-  }, [ages, selectedAge]);
+  const sortedAges = useMemo(() => {
+      return Object.keys(eventsByAge).map(Number).sort((a, b) => b - a);
+  }, [eventsByAge]);
 
 
   return (
     <div className="p-4 md:p-6 lg:p-8 relative">
         <AddEventForm onAddEvent={onAddEvent} />
         <div className="max-w-4xl mx-auto">
-            <div className="flex flex-wrap items-center justify-center gap-4 mb-8">
-                {ages.map(age => (
-                    <Button
-                        key={age}
-                        variant={selectedAge === age ? 'default' : 'outline'}
-                        className="rounded-full h-12 w-12 text-lg"
-                        onClick={() => setSelectedAge(age)}
-                    >
-                        {age}
-                    </Button>
-                ))}
-            </div>
-            {selectedAge !== null && (
-                <div>
-                     <h2 className="text-2xl font-bold text-center mb-6">Events at Age {selectedAge}</h2>
-                     {filteredEvents.length > 0 ? (
-                        <div className="relative">
-                            {filteredEvents.map((event, index) => (
-                                <TimelineItem key={event.id} event={event} isLast={index === filteredEvents.length - 1} />
-                            ))}
-                        </div>
+            <Card>
+                <CardHeader>
+                    <CardTitle>Your Life Story</CardTitle>
+                    <CardDescription>A chronological record of your health journey, organized by age.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    {sortedAges.length > 0 ? (
+                        <Accordion type="single" collapsible className="w-full">
+                            {sortedAges.map(age => {
+                                const ageEvents = eventsByAge[age];
+                                const eventSummary = ageEvents.map(e => e.type).slice(0, 3).join(', ') + (ageEvents.length > 3 ? '...' : '');
+                                return (
+                                    <AccordionItem value={`age-${age}`} key={age}>
+                                        <AccordionTrigger className="text-xl font-bold">
+                                            <div className="flex justify-between w-full items-center pr-4">
+                                                <span>Age {age}</span>
+                                                <span className="text-sm font-normal text-muted-foreground">{eventSummary}</span>
+                                            </div>
+                                        </AccordionTrigger>
+                                        <AccordionContent>
+                                            <div className="relative pt-2">
+                                                {ageEvents.map((event, index) => (
+                                                    <TimelineItem key={event.id} event={event} isLast={index === ageEvents.length - 1} />
+                                                ))}
+                                            </div>
+                                        </AccordionContent>
+                                    </AccordionItem>
+                                )
+                            })}
+                        </Accordion>
                      ) : (
-                        <p className="text-center text-muted-foreground">No events recorded for this age.</p>
+                        <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm py-12">
+                            <div className="flex flex-col items-center gap-2 text-center">
+                                <h3 className="text-2xl font-bold tracking-tight">No Events Yet</h3>
+                                <p className="text-sm text-muted-foreground">Click the plus button to add your first health event.</p>
+                            </div>
+                        </div>
                      )}
-                </div>
-            )}
+                </CardContent>
+            </Card>
         </div>
     </div>
   );
 }
-
-    
