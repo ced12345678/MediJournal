@@ -32,12 +32,13 @@ import { Textarea } from './ui/textarea';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
+
 const navItems = [
   { id: 'timeline', label: 'Life', icon: Sparkle },
   { id: 'visits', label: 'Doctor Visits', icon: Stethoscope },
   { id: 'medication', label: 'Medication', icon: Pill },
   { id: 'history', label: 'History', icon: Users },
-  { id: 'tips', label: 'Health Tips', icon: HeartPulse },
+  { id: 'tips', label: 'Health Hub', icon: HeartPulse },
   { id: 'sharing', label: 'Hospital Sharing', icon: Share2 },
   { id: 'account', label: 'Account', icon: User },
 ];
