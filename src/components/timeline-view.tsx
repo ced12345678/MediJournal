@@ -51,53 +51,10 @@ export const initialEvents: TimelineEvent[] = [
         type: 'Vaccination',
     },
     {
-        id: '3', age: 4, date: '2003-06-01', title: 'MMR & Varicella Vaccine',
-        description: 'Received Measles, Mumps, Rubella, and Chickenpox vaccines.',
-        type: 'Vaccination',
-    },
-    {
         id: '4', age: 6, date: '2005-09-10', title: 'Broken Arm',
-        description: 'Fell from monkey bars, resulting in a fractured left radius. Cast for 6 weeks.',
+        description: 'Fell from monkey bars, resulting in a fractured left radius.',
         type: 'Doctor Visit',
         details: { visitType: 'Serious Visit', diseaseName: 'Fractured Radius' }
-    },
-     {
-        id: '12', age: 7, date: '2006-11-01', title: 'Chickenpox',
-        description: 'Contracted chickenpox. Recovered after two weeks of rest.',
-        type: 'Disease',
-    },
-    {
-        id: '5', age: 11, date: '2010-08-20', title: 'Tdap & HPV Vaccine',
-        description: 'Received Tdap booster and first dose of HPV vaccine.',
-        type: 'Vaccination',
-    },
-    {
-        id: '6', age: 16, date: '2015-05-30', title: 'Annual Physical',
-        description: 'Sports physical for high school soccer. All clear.',
-        type: 'Doctor Visit',
-        details: { visitType: 'Casual Visit' }
-    },
-    {
-        id: '7', age: 18, date: '2017-12-22', title: 'Wisdom Teeth Extraction',
-        description: 'All four wisdom teeth removed. Prescribed Vicodin for pain.',
-        type: 'Medication',
-        details: { status: 'Stopped' }
-    },
-    {
-        id: '8', age: 22, date: '2021-04-15', title: 'COVID-19 Vaccine',
-        description: 'Received first dose of Pfizer-BioNTech COVID-19 vaccine.',
-        type: 'Vaccination',
-    },
-    {
-        id: '9', age: 22, date: '2021-05-06', title: 'COVID-19 Vaccine',
-        description: 'Received second dose of Pfizer-BioNTech COVID-19 vaccine.',
-        type: 'Vaccination',
-    },
-    {
-        id: '10', age: 24, date: '2023-11-02', title: 'Sprained Ankle',
-        description: 'Sprained right ankle playing basketball. Advised RICE protocol.',
-        type: 'Doctor Visit',
-        details: { visitType: 'Serious Visit', diseaseName: 'Ankle Sprain' }
     },
     {
         id: '11', age: 25, date: '2024-06-10', title: 'Annual Check-up',
