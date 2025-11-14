@@ -122,7 +122,7 @@ const TimelineItem = ({ event, isLast }: { event: TimelineEvent; isLast: boolean
       <div className="ml-4">
         <div className="flex items-center gap-2">
             <p className="font-semibold text-md">{event.title}</p>
-            {event.details?.visitType && <Badge variant="outline">{event.details.visitType}</Badge>}
+            {event.details?.visitType && <Badge variant={event.details.visitType === 'Serious Visit' ? 'destructive' : 'secondary'}>{event.details.visitType}</Badge>}
         </div>
         <p className="text-sm text-muted-foreground">{new Date(event.date).toLocaleDateString()}</p>
         <p className="text-sm text-foreground/80 mt-1">{event.description}</p>

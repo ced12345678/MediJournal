@@ -20,6 +20,7 @@ import { ThemeToggle } from './theme-toggle';
 import TimelineView, { type TimelineEvent, type EventType, eventTypes, initialEvents } from './timeline-view';
 import FamilyHistoryAnalysis from './family-history-analysis';
 import SafeTravels from './safe-travels';
+import HospitalSharing from './hospital-sharing';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from './ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
@@ -129,17 +130,49 @@ const AddEventForm = ({
         
         let eventDetails: TimelineEvent['details'] = {};
         if (type === 'Doctor Visit') {
-            eventDetails = {
-                visitType: visitType,
-                diseaseName: visitType === 'Serious Visit' ? diseaseName : undefined,
-                medicationsPrescribed: visitType === 'Serious Visit' ? medicationsPrescribed : undefined,
+            const newEvents: Omit<TimelineEvent, 'id'>[] = [];
+            let visitDescription = description;
+            
+            const visitEvent: Omit<TimelineEvent, 'id'> = {
+                title,
+                date,
+                description: visitDescription,
+                type: 'Doctor Visit',
+                age: parseInt(age),
+                details: {
+                    visitType: visitType,
+                    diseaseName: visitType === 'Serious Visit' ? diseaseName : undefined,
+                    medicationsPrescribed: visitType === 'Serious Visit' ? medicationsPrescribed : undefined,
+                }
             };
-            onAddEvent({ title, date, description, type, age: parseInt(age), details: eventDetails });
+            newEvents.push(visitEvent);
+
+            if (visitType === 'Serious Visit' && diseaseName) {
+                newEvents.push({
+                    title: diseaseName,
+                    date: date,
+                    description: `Diagnosed during a visit for: ${title}.`,
+                    type: 'Disease',
+                    age: parseInt(age),
+                });
+            }
+             if (visitType === 'Serious Visit' && medicationsPrescribed) {
+                newEvents.push({
+                    title: medicationsPrescribed,
+                    date: date,
+                    description: `Prescribed for ${diseaseName || title}`,
+                    type: 'Medication',
+                    age: parseInt(age),
+                    details: { status: 'Stopped' }
+                });
+            }
+
+            onAddEvent(newEvents);
         } else if (type === 'Disease' && medicationForDisease) {
             const diseaseEvent: Omit<TimelineEvent, 'id'> = {
                 title,
                 date,
-                description: `${description} (Treated with ${medicationForDisease})`,
+                description: `${description}`,
                 type: 'Disease',
                 age: parseInt(age),
             };
@@ -215,14 +248,16 @@ const AddEventForm = ({
                                     </RadioGroup>
                                 </div>
                                  {visitType === 'Serious Visit' && (
-                                    <div className="space-y-4 pl-2 pt-2 border-l ml-2">
+                                    <div className="space-y-4 pl-2 pt-4 border-l ml-2">
                                         <div className="space-y-2">
-                                            <Label htmlFor="diseaseName">Disease Name</Label>
+                                            <Label htmlFor="diseaseName">Diagnosis / Disease Name (optional)</Label>
                                             <Input id="diseaseName" value={diseaseName} onChange={(e) => setDiseaseName(e.target.value)} placeholder="e.g., Influenza" />
+                                             <p className="text-xs text-muted-foreground">This will also create a new entry in the "Diseases" section.</p>
                                         </div>
                                         <div className="space-y-2">
-                                            <Label htmlFor="medicationsPrescribed">Medications Prescribed</Label>
+                                            <Label htmlFor="medicationsPrescribed">Medications Prescribed (optional)</Label>
                                             <Input id="medicationsPrescribed" value={medicationsPrescribed} onChange={(e) => setMedicationsPrescribed(e.target.value)} placeholder="e.g., Tamiflu" />
+                                            <p className="text-xs text-muted-foreground">This will also create a new entry in the "Medication" section.</p>
                                         </div>
                                     </div>
                                 )}
@@ -234,7 +269,7 @@ const AddEventForm = ({
                                  <div className="space-y-2">
                                     <Label htmlFor="medicationForDisease">Medication Prescribed (optional)</Label>
                                     <Input id="medicationForDisease" value={medicationForDisease} onChange={(e) => setMedicationForDisease(e.target.value)} placeholder="e.g., Amoxicillin" />
-                                    <p className="text-xs text-muted-foreground">If entered, this will also create an entry in the Medication section.</p>
+                                    <p className="text-xs text-muted-foreground">If entered, this will also create an entry in the "Medication" section.</p>
                                 </div>
                             </div>
                         )}
@@ -269,7 +304,7 @@ function DoctorVisits({ events, onAddEvent }: { events: TimelineEvent[], onAddEv
                                 <CardTitle>{visit.title}</CardTitle>
                                 <CardDescription>{new Date(visit.date).toLocaleDateString()} (Age {visit.age})</CardDescription>
                             </div>
-                             {visit.details?.visitType && <Badge variant="outline">{visit.details.visitType}</Badge>}
+                             {visit.details?.visitType && <Badge variant={visit.details.visitType === 'Serious Visit' ? 'destructive' : 'secondary'}>{visit.details.visitType}</Badge>}
                         </div>
                     </CardHeader>
                     <CardContent>
@@ -655,7 +690,7 @@ export default function HealthSyncApp() {
       case 'tips':
         return <SafeTravels />;
       case 'sharing':
-        return <PlaceholderContent title="Hospital Sharing" />;
+        return <HospitalSharing />;
       default:
         return <PlaceholderContent title="Coming Soon" />;
     }
