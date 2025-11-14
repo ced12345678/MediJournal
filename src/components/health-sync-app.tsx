@@ -8,11 +8,9 @@ import {
   User,
   PanelLeft,
   Stethoscope,
-  Clock,
   Pill,
   Map,
   Sparkle,
-  PlusCircle,
 } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
@@ -20,7 +18,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { ThemeToggle } from './theme-toggle';
 import TimelineView, { type TimelineEvent, type EventType, eventTypes, initialEvents } from './timeline-view';
 import FamilyHistoryAnalysis from './family-history-analysis';
-import HealthTips from './health-tips';
+import SafeTravels from './safe-travels';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from './ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
@@ -38,7 +36,7 @@ const navItems = [
   { id: 'visits', label: 'Doctor Visits', icon: Stethoscope },
   { id: 'medication', label: 'Medication', icon: Pill },
   { id: 'history', label: 'History', icon: Users },
-  { id: 'tips', label: 'Health Hub', icon: HeartPulse },
+  { id: 'tips', label: 'SafeTravels', icon: Map },
   { id: 'sharing', label: 'Hospital Sharing', icon: Share2 },
   { id: 'account', label: 'Account', icon: User },
 ];
@@ -320,7 +318,7 @@ const NavContent = ({
 }) => (
   <>
     <div className="flex items-center gap-2 px-4 py-3 border-b">
-      <Stethoscope className="h-8 w-8 text-primary" />
+      <HeartPulse className="h-8 w-8 text-primary" />
       <h1 className="text-2xl font-bold text-foreground">HealthSync</h1>
     </div>
     <nav className="flex-1 space-y-2 p-4">
@@ -383,7 +381,7 @@ export default function HealthSyncApp() {
       case 'account':
         return <AccountSection />;
       case 'tips':
-        return <HealthTips />;
+        return <SafeTravels />;
       case 'sharing':
         return <PlaceholderContent title="Hospital Sharing" />;
       default:

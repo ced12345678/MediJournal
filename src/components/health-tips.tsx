@@ -1,123 +1,436 @@
 "use client";
 
-import React, { useState, useTransition } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import React, { useState, useEffect } from 'react';
+import {
+  Users,
+  HeartPulse,
+  Share2,
+  User,
+  PanelLeft,
+  Stethoscope,
+  Pill,
+  Map,
+  Sparkle,
+} from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
-import { generateHealthTipsAction } from '@/lib/actions';
-import type { GenerateHealthTipsOutput } from '@/ai/flows/generate-health-tips';
-import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { Loader2, Sparkles, Siren, Shield, Heart } from 'lucide-react';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { ThemeToggle } from './theme-toggle';
+import TimelineView, { type TimelineEvent, type EventType, eventTypes, initialEvents } from './timeline-view';
+import FamilyHistoryAnalysis from './family-history-analysis';
+import SafeTravels from './safe-travels';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from './ui/alert-dialog';
+import { useToast } from '@/hooks/use-toast';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Badge } from './ui/badge';
-import { cn } from '@/lib/utils';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from './ui/dialog';
+import { Input } from './ui/input';
+import { Textarea } from './ui/textarea';
+import { Label } from './ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
-type HealthTipsState = {
-  data: GenerateHealthTipsOutput | null;
-  error: string | null;
-  isLoading: boolean;
-};
 
-const categoryIcons = {
-    'Vaccination': <Shield className="h-5 w-5" />,
-    'Diet': <Heart className="h-5 w-5" />,
-    'Exercise': <Heart className="h-5 w-5" />,
-    'Local Alert': <Siren className="h-5 w-5" />,
-    'General Wellness': <Sparkles className="h-5 w-5" />,
-    'Default': <Sparkles className="h-5 w-5" />,
-}
+const navItems = [
+  { id: 'timeline', label: 'Life', icon: Sparkle },
+  { id: 'visits', label: 'Doctor Visits', icon: Stethoscope },
+  { id: 'medication', label: 'Medication', icon: Pill },
+  { id: 'history', label: 'History', icon: Users },
+  { id: 'tips', label: 'SafeTravels', icon: Map },
+  { id: 'sharing', label: 'Hospital Sharing', icon: Share2 },
+  { id: 'account', label: 'Account', icon: User },
+];
 
-const severityColors = {
-    low: 'bg-green-100 border-green-200 text-green-800 dark:bg-green-900/30 dark:border-green-800/50 dark:text-green-300',
-    medium: 'bg-yellow-100 border-yellow-200 text-yellow-800 dark:bg-yellow-900/30 dark:border-yellow-800/50 dark:text-yellow-300',
-    high: 'bg-red-100 border-red-200 text-red-800 dark:bg-red-900/30 dark:border-red-800/50 dark:text-red-300',
-}
+type NavItem = typeof navItems[number];
 
-export default function HealthTips() {
-  const [location, setLocation] = useState('');
-  const [state, setState] = useState<HealthTipsState>({ data: null, error: null, isLoading: false });
-  const [isPending, startTransition] = useTransition();
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!location.trim()) return;
-
-    setState({ data: null, error: null, isLoading: true });
-
-    startTransition(async () => {
-      const result = await generateHealthTipsAction({ location: location, age: 25 }); // Assuming age 25 for now
-      setState({ data: result.data, error: result.error, isLoading: false });
-    });
-  };
-
+function PlaceholderContent({ title }: { title: string }) {
   return (
-    <div className="p-4 md:p-6 space-y-6">
-      <Card>
+    <div className="p-4 md:p-6">
+       <Card>
         <CardHeader>
-          <CardTitle>Personalized Health Tips</CardTitle>
-          <CardDescription>Enter your city to get AI-powered health recommendations tailored to you.</CardDescription>
+          <CardTitle>{title}</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2">
-            <Input
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              placeholder="e.g., New York, USA"
-              className="flex-1"
-              disabled={isPending}
-            />
-            <Button type="submit" disabled={isPending || !location.trim()}>
-              {isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  Get Tips
-                </>
-              )}
-            </Button>
-          </form>
+          <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm py-12">
+            <div className="flex flex-col items-center gap-2 text-center">
+              <h3 className="text-2xl font-bold tracking-tight">Coming Soon</h3>
+              <p className="text-sm text-muted-foreground">Content for this section is being developed.</p>
+            </div>
+          </div>
         </CardContent>
       </Card>
+    </div>
+  );
+}
 
-      {state.isLoading && (
-        <div className="flex justify-center items-center py-10">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+const AddEventForm = ({
+  onAddEvent,
+  defaultEventType,
+  children,
+}: {
+  onAddEvent: (event: Omit<TimelineEvent, 'id'>) => void,
+  defaultEventType?: EventType,
+  children: React.ReactNode
+}) => {
+    const [title, setTitle] = useState('');
+    const [date, setDate] = useState('');
+    const [age, setAge] = useState('');
+    const [description, setDescription] = useState('');
+    const [type, setType] = useState<EventType>(defaultEventType || 'Other');
+    const [open, setOpen] = useState(false);
+
+    useEffect(() => {
+        if (defaultEventType) {
+            setType(defaultEventType);
+        }
+    }, [defaultEventType]);
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!title || !date || !type || !age) return;
+        onAddEvent({ title, date, description, type, age: parseInt(age) });
+        setTitle('');
+        setDate('');
+        setAge('');
+        setDescription('');
+        setType(defaultEventType || 'Other');
+        setOpen(false);
+    };
+
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+                {children}
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Add New Timeline Event</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="title">Title / Reason</Label>
+                        <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} required />
+                    </div>
+                     <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="date">Date</Label>
+                            <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+                        </div>
+                         <div className="space-y-2">
+                            <Label htmlFor="age">Age</Label>
+                            <Input id="age" type="number" value={age} onChange={(e) => setAge(e.target.value)} required />
+                        </div>
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="type">Event Type</Label>
+                        <Select onValueChange={(value) => setType(value as EventType)} value={type}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select an event type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {eventTypes.map(type => (
+                                    <SelectItem key={type} value={type}>{type}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="description">Description / Notes</Label>
+                        <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} />
+                    </div>
+                    <DialogFooter>
+                        <DialogClose asChild>
+                           <Button type="button" variant="ghost">Cancel</Button>
+                        </DialogClose>
+                        <Button type="submit">Add Event</Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
+    )
+}
+
+function DoctorVisits({ events, onAddEvent }: { events: TimelineEvent[], onAddEvent: (event: Omit<TimelineEvent, 'id'>) => void }) {
+    const visits = events.filter(e => e.type === 'Doctor Visit').sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    return (
+        <div className="p-4 md:p-6 space-y-4">
+            {visits.map(visit => (
+                <Card key={visit.id}>
+                    <CardHeader>
+                        <CardTitle>{visit.title}</CardTitle>
+                        <CardDescription>{new Date(visit.date).toLocaleDateString()} (Age {visit.age})</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-sm">{visit.description}</p>
+                    </CardContent>
+                </Card>
+            ))}
+            <div className="flex justify-end">
+                <AddEventForm onAddEvent={onAddEvent} defaultEventType="Doctor Visit">
+                    <Button>Add Visit</Button>
+                </AddEventForm>
+            </div>
         </div>
-      )}
+    );
+}
 
-      {state.error && (
-        <Alert variant="destructive">
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{state.error}</AlertDescription>
-        </Alert>
-      )}
+function Medication({ events, onAddEvent }: { events: TimelineEvent[], onAddEvent: (event: Omit<TimelineEvent, 'id'>) => void }) {
+     const medications = events.filter(e => e.type === 'Medication').sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-      {state.data && (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {state.data.tips.map((tip, index) => {
-            const Icon = categoryIcons[tip.category as keyof typeof categoryIcons] || categoryIcons['Default'];
-            const severityClass = severityColors[tip.severity];
+    return (
+        <div className="p-4 md:p-6 space-y-4">
+            {medications.map(med => (
+                <Card key={med.id}>
+                    <CardHeader>
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <CardTitle>{med.title}</CardTitle>
+                                <CardDescription>Started: {new Date(med.date).toLocaleDateString()} (Age {med.age})</CardDescription>
+                            </div>
+                            <Badge variant={med.details?.status === 'Active' ? 'default' : 'secondary'} className={med.details?.status === 'Active' ? 'bg-green-600' : ''}>
+                                {med.details?.status || 'Stopped'}
+                            </Badge>
+                        </div>
+                    </CardHeader>
+                     <CardContent>
+                        <p className="text-sm">{med.description}</p>
+                    </CardContent>
+                </Card>
+            ))}
+            <div className="flex justify-end">
+                 <AddEventForm onAddEvent={onAddEvent} defaultEventType="Medication">
+                    <Button>Add Medication</Button>
+                </AddEventForm>
+            </div>
+        </div>
+    );
+}
 
-            return (
-              <Card key={index} className={cn("flex flex-col", severityClass)}>
+function History() {
+    const places = [
+        {id: 1, location: 'Mexico', year: 2022, notes: 'Vacation, no health issues.'},
+        {id: 2, location: 'India', year: 2019, notes: 'Work trip, received Typhoid vaccine before travel.'}
+    ]
+    return (
+        <div className="p-4 md:p-6">
+            <Tabs defaultValue="family">
+                <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="family">Family History</TabsTrigger>
+                    <TabsTrigger value="travel">Places Travelled</TabsTrigger>
+                </TabsList>
+                <TabsContent value="family">
+                    <FamilyHistoryAnalysis />
+                </TabsContent>
+                <TabsContent value="travel">
+                     <Card>
+                        <CardHeader>
+                            <CardTitle>Travel History</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                             {places.map(place => (
+                                <div key={place.id} className="p-3 rounded-lg border bg-card">
+                                    <p className="font-semibold">{place.location} - {place.year}</p>
+                                    <p className="text-sm text-muted-foreground">{place.notes}</p>
+                                </div>
+                            ))}
+                            <div className="flex justify-end pt-4">
+                                <Button>Add Travel Record</Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+            </Tabs>
+        </div>
+    )
+}
+
+function AccountSection() {
+    const { toast } = useToast();
+    const [userId, setUserId] = React.useState('');
+
+    React.useEffect(() => {
+      let id = localStorage.getItem('healthsync-userId');
+      if (!id) {
+        id = `user_${self.crypto.randomUUID()}`;
+        localStorage.setItem('healthsync-userId', id);
+      }
+      setUserId(id);
+    }, []);
+
+    const handleDelete = () => {
+      localStorage.clear();
+      toast({ variant: "destructive", title: "Account Deleted", description: "Your account has been permanently deleted."});
+      setTimeout(() => window.location.reload(), 1000);
+    }
+
+    return (
+        <div className="p-4 md:p-6">
+            <Card>
                 <CardHeader>
-                  <div className="flex items-center gap-3">
-                    <div className="flex-shrink-0">{Icon}</div>
-                    <CardTitle className="text-lg">{tip.title}</CardTitle>
-                  </div>
-                   <Badge variant="outline" className="w-fit mt-2">{tip.category}</Badge>
+                    <CardTitle>Account Information</CardTitle>
+                    <CardDescription>Manage your account settings and actions. All your data is stored locally in this browser.</CardDescription>
                 </CardHeader>
-                <CardContent className="flex-grow">
-                  <p className="text-sm">{tip.description}</p>
+                <CardContent className="space-y-4">
+                    <div className="space-y-1">
+                        <p className="text-sm font-medium text-muted-foreground">User ID</p>
+                        <p className="font-mono text-sm bg-muted p-2 rounded-md break-all">{userId}</p>
+                    </div>
+                     <div className="space-y-2">
+                        <p className="font-semibold">Name: John Doe</p>
+                        <p className="font-semibold">Age: 34</p>
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button variant="destructive">Delete All Data & Reset</Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        This action cannot be undone. This will permanently delete all your data from this browser and reset the application.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={handleDelete}>
+                                        Delete Data
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    </div>
                 </CardContent>
-              </Card>
-            )
-        })}
+            </Card>
         </div>
-      )}
+    );
+}
+
+const NavContent = ({
+  activeItem,
+  setActiveItem,
+  closeSheet,
+}: {
+  activeItem: NavItem;
+  setActiveItem: (item: NavItem) => void;
+  closeSheet?: () => void;
+}) => (
+  <>
+    <div className="flex items-center gap-2 px-4 py-3 border-b">
+      <HeartPulse className="h-8 w-8 text-primary" />
+      <h1 className="text-2xl font-bold text-foreground">HealthSync</h1>
+    </div>
+    <nav className="flex-1 space-y-2 p-4">
+      {navItems.map((item) => (
+        <Button
+          key={item.id}
+          variant={activeItem.id === item.id ? 'secondary' : 'ghost'}
+          className="w-full justify-start gap-3"
+          onClick={() => {
+            setActiveItem(item);
+            closeSheet?.();
+          }}
+        >
+          <item.icon className="h-5 w-5" />
+          {item.label}
+        </Button>
+      ))}
+    </nav>
+  </>
+);
+
+export default function HealthSyncApp() {
+  const [activeItem, setActiveItem] = useState<NavItem>(navItems[0]);
+  const isMobile = useIsMobile();
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
+
+  useEffect(() => {
+    try {
+      const storedEvents = localStorage.getItem('healthsync-timeline');
+      if (storedEvents) {
+        setTimelineEvents(JSON.parse(storedEvents));
+      } else {
+        setTimelineEvents(initialEvents);
+        localStorage.setItem('healthsync-timeline', JSON.stringify(initialEvents));
+      }
+    } catch (error) {
+      console.error("Failed to parse timeline events from localStorage", error);
+      setTimelineEvents(initialEvents);
+    }
+  }, []);
+
+  const addEvent = (event: Omit<TimelineEvent, 'id'>) => {
+    const newEvent = { ...event, id: self.crypto.randomUUID() };
+    const updatedEvents = [...timelineEvents, newEvent]
+    setTimelineEvents(updatedEvents);
+    localStorage.setItem('healthsync-timeline', JSON.stringify(updatedEvents));
+  }
+  
+  const renderContent = () => {
+    switch (activeItem.id) {
+      case 'timeline':
+        return <TimelineView events={timelineEvents} onAddEvent={addEvent} />;
+      case 'visits':
+        return <DoctorVisits events={timelineEvents} onAddEvent={addEvent} />;
+      case 'medication':
+        return <Medication events={timelineEvents} onAddEvent={addEvent} />;
+      case 'history':
+        return <History />;
+      case 'account':
+        return <AccountSection />;
+      case 'tips':
+        return <SafeTravels />;
+      case 'sharing':
+        return <PlaceholderContent title="Hospital Sharing" />;
+      default:
+        return <PlaceholderContent title="Coming Soon" />;
+    }
+  };
+
+  if (isMobile === undefined) {
+    return null; // or a loading spinner
+  }
+
+  if (isMobile) {
+    return (
+      <div className="flex flex-col h-screen bg-background">
+        <header className="flex items-center justify-between p-2 border-b">
+          <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <PanelLeft className="h-6 w-6" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="p-0 w-[80%] flex flex-col">
+              <NavContent activeItem={activeItem} setActiveItem={setActiveItem} closeSheet={() => setSheetOpen(false)} />
+            </SheetContent>
+          </Sheet>
+          <span className="text-lg font-semibold">{activeItem.label}</span>
+          <ThemeToggle />
+        </header>
+        <main className="flex-1 overflow-y-auto bg-secondary/50">{renderContent()}</main>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex h-screen bg-background text-foreground">
+      <aside className="w-64 flex flex-col border-r bg-card">
+        <NavContent activeItem={activeItem} setActiveItem={setActiveItem} />
+        <div className="p-4 border-t">
+            <ThemeToggle />
+        </div>
+      </aside>
+      <div className="flex flex-1 flex-col">
+        <header className="flex items-center justify-between p-4 border-b">
+            <h2 className="text-xl font-semibold">{activeItem.label}</h2>
+        </header>
+        <main className="flex-1 overflow-y-auto bg-secondary/50">
+            {renderContent()}
+        </main>
+      </div>
     </div>
   );
 }
