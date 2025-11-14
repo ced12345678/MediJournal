@@ -38,36 +38,63 @@ export type TimelineEvent = {
 
 export const initialEvents: TimelineEvent[] = [
     {
-        id: '1', age: 5, date: '2005-01-15', title: 'MMR Vaccine',
-        description: 'Received the Measles, Mumps, and Rubella vaccine.',
+        id: '1', age: 0, date: '1999-05-20', title: 'Born',
+        description: 'Born at City General Hospital.',
+        type: 'Other',
+        details: { height: "20 inches", weight: "7 lbs 8 oz" }
+    },
+    {
+        id: '2', age: 1, date: '2000-07-15', title: 'DTaP & Polio Vaccine',
+        description: 'Received first doses of DTaP and Polio vaccines.',
         type: 'Vaccination',
     },
     {
-        id: '2', age: 10, date: '2010-08-20', title: 'Annual Physical',
-        description: 'Height and weight measured.',
-        type: 'Measurement',
-        details: { height: "4'5\"", weight: "70 lbs" }
+        id: '3', age: 4, date: '2003-06-01', title: 'MMR & Varicella Vaccine',
+        description: 'Received Measles, Mumps, Rubella, and Chickenpox vaccines.',
+        type: 'Vaccination',
     },
     {
-        id: '3', age: 15, date: '2015-06-01', title: 'Wisdom Tooth Extraction',
-        description: 'Prescribed Ibuprofen for pain management.',
+        id: '4', age: 6, date: '2005-09-10', title: 'Broken Arm',
+        description: 'Fell from monkey bars, resulting in a fractured left radius. Cast for 6 weeks.',
+        type: 'Doctor Visit',
+    },
+    {
+        id: '5', age: 11, date: '2010-08-20', title: 'Tdap & HPV Vaccine',
+        description: 'Received Tdap booster and first dose of HPV vaccine.',
+        type: 'Vaccination',
+    },
+    {
+        id: '6', age: 16, date: '2015-05-30', title: 'Annual Physical',
+        description: 'Sports physical for high school soccer. All clear.',
+        type: 'Measurement',
+        details: { height: "5'10\"", weight: "155 lbs" }
+    },
+    {
+        id: '7', age: 18, date: '2017-12-22', title: 'Wisdom Teeth Extraction',
+        description: 'All four wisdom teeth removed. Prescribed Vicodin for pain.',
         type: 'Medication',
         details: { status: 'Stopped' }
     },
     {
-        id: '4', age: 20, date: '2020-03-10', title: 'Flu Shot',
-        description: 'Annual influenza vaccination.',
+        id: '8', age: 22, date: '2021-04-15', title: 'COVID-19 Vaccine',
+        description: 'Received first dose of Pfizer-BioNTech COVID-19 vaccine.',
         type: 'Vaccination',
     },
     {
-        id: '5', age: 25, date: '2025-02-05', title: 'Annual Check-up',
-        description: 'Routine physical. All vitals normal.',
+        id: '9', age: 22, date: '2021-05-06', title: 'COVID-19 Vaccine',
+        description: 'Received second dose of Pfizer-BioNTech COVID-19 vaccine.',
+        type: 'Vaccination',
+    },
+    {
+        id: '10', age: 24, date: '2023-11-02', title: 'Sprained Ankle',
+        description: 'Sprained right ankle playing basketball. Advised RICE protocol.',
         type: 'Doctor Visit',
     },
     {
-        id: '6', age: 10, date: '2010-03-22', title: 'Chickenpox',
-        description: 'Contracted chickenpox. Recovered fully.',
-        type: 'Other',
+        id: '11', age: 25, date: '2024-06-10', title: 'Annual Check-up',
+        description: 'Routine physical. All vitals normal. Blood work looks good.',
+        type: 'Doctor Visit',
+        details: { height: "6'0\"", weight: "175 lbs" }
     },
 ];
 
@@ -214,7 +241,7 @@ export default function TimelineView({ events, onAddEvent }: { events: TimelineE
                         <Accordion type="single" collapsible className="w-full">
                             {sortedAges.map(age => {
                                 const ageEvents = eventsByAge[age];
-                                if (!ageEvents || ageEvents.length === 0) {
+                                if (!ageEvents) {
                                     return null;
                                 }
                                 const eventSummary = ageEvents.map(e => e.type).slice(0, 3).join(', ') + (ageEvents.length > 3 ? '...' : '');
