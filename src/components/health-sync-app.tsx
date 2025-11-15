@@ -15,6 +15,7 @@ import {
   Moon,
   Sun,
   Settings,
+  Menu,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import TimelineView, { type TimelineEvent } from './timeline-view';
@@ -31,8 +32,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { useTheme } from 'next-themes';
 import { Badge } from './ui/badge';
 import { AddEventForm } from './add-event-form';
-import { cn } from '@/lib/utils';
-
 
 const navItems = [
   { id: 'timeline', label: 'Life', icon: Sparkle },
@@ -44,31 +43,6 @@ const navItems = [
 ];
 
 export type NavItem = typeof navItems[number];
-
-function Sidebar({ activeItem, onNavigate }: { activeItem: NavItem, onNavigate: (item: NavItem) => void }) {
-    return (
-        <div className="flex flex-col h-full bg-card p-4 space-y-2">
-             <div className="flex items-center gap-2 mb-6 px-2">
-                <HeartPulse className="h-8 w-8 text-primary" />
-                <h1 className="text-2xl font-bold text-foreground">HealthSync</h1>
-            </div>
-            {navItems.map(item => (
-                <Button
-                    key={item.id}
-                    variant="ghost"
-                    onClick={() => onNavigate(item)}
-                    className={cn(
-                        "w-full justify-start text-base px-4 py-6",
-                        activeItem.id === item.id && "bg-accent text-accent-foreground"
-                    )}
-                >
-                    <item.icon className="mr-3 h-5 w-5" />
-                    {item.label}
-                </Button>
-            ))}
-        </div>
-    );
-}
 
 function DoctorVisits({ events, onAddEvent }: { events: TimelineEvent[], onAddEvent: (event: Omit<TimelineEvent, 'id'> | Omit<TimelineEvent, 'id'>[]) => void }) {
     const visits = events.filter(e => e.type === 'Doctor Visit').sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -278,7 +252,33 @@ const AppHeader = ({ onNavigate }: { onNavigate: (item: NavItem) => void }) => {
     const { setTheme } = useTheme();
 
     return (
-        <header className="flex items-center justify-end p-4 border-b bg-background">
+        <header className="flex items-center justify-between p-4 border-b bg-card">
+            <div className="flex items-center gap-4">
+                 <div className="flex items-center gap-2">
+                    <HeartPulse className="h-8 w-8 text-primary" />
+                    <h1 className="text-2xl font-bold text-foreground">HealthSync</h1>
+                </div>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline">
+                           <Menu className="h-4 w-4 mr-2" />
+                            Sections
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start">
+                         <DropdownMenuLabel>
+                            Go To
+                        </DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        {navItems.map(item => (
+                            <DropdownMenuItem key={item.id} onClick={() => onNavigate(item)}>
+                               <item.icon className="mr-2 h-4 w-4" />
+                                <span>{item.label}</span>
+                            </DropdownMenuItem>
+                        ))}
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
              <div className="flex items-center gap-2">
                  <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -382,14 +382,13 @@ export default function HealthSyncApp() {
   };
 
   return (
-    <div className="grid grid-cols-[280px_1fr] h-screen bg-background text-foreground">
-        <Sidebar activeItem={activeItem} onNavigate={setActiveItem} />
-        <div className="flex flex-col">
-            <AppHeader onNavigate={setActiveItem} />
-            <main className="flex-1 overflow-y-auto">
-                {renderContent()}
-            </main>
-        </div>
+    <div className="flex flex-col h-screen bg-background text-foreground">
+        <AppHeader onNavigate={setActiveItem} />
+        <main className="flex-1 overflow-y-auto">
+            {renderContent()}
+        </main>
     </div>
   );
 }
+
+    
