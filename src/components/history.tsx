@@ -116,14 +116,17 @@ function TravelHistory() {
     }
 
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle>Travel History</CardTitle>
-                <CardDescription>A log of places you have traveled to.</CardDescription>
+        <Card className="transform transition-all duration-300 hover:shadow-xl">
+            <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                    <CardTitle>Travel History</CardTitle>
+                    <CardDescription>A log of places you have traveled to.</CardDescription>
+                </div>
+                 <AddTravelRecordForm onAdd={handleAddRecord} />
             </CardHeader>
             <CardContent className="space-y-4">
                  {travelHistory.length > 0 ? travelHistory.sort((a,b) => parseInt(b.year) - parseInt(a.year)).map(place => (
-                    <div key={place.id} className="relative p-4 rounded-lg border bg-card group">
+                    <div key={place.id} className="relative p-4 rounded-lg border bg-background group">
                         <div className="pr-10">
                             <p className="font-semibold">{place.location} - {place.year}</p>
                             {place.duration && <p className="text-sm text-muted-foreground">Duration: {place.duration}</p>}
@@ -154,9 +157,6 @@ function TravelHistory() {
                 )) : (
                     <p className="text-sm text-muted-foreground text-center py-8">No travel records yet.</p>
                 )}
-                <div className="flex justify-end pt-4">
-                    <AddTravelRecordForm onAdd={handleAddRecord} />
-                </div>
             </CardContent>
         </Card>
     )
@@ -188,7 +188,7 @@ function FamilyHistory() {
     }
 
     return (
-        <Card>
+        <Card className="transform transition-all duration-300 hover:shadow-xl">
             <CardHeader>
                 <CardTitle>Family Medical History</CardTitle>
                 <CardDescription>
@@ -212,19 +212,9 @@ function FamilyHistory() {
 
 export default function History() {
     return (
-        <div className="p-4 md:p-6">
-            <Tabs defaultValue="family">
-                <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="family">Family History</TabsTrigger>
-                    <TabsTrigger value="travel">Travel History</TabsTrigger>
-                </TabsList>
-                <TabsContent value="family">
-                    <FamilyHistory />
-                </TabsContent>
-                <TabsContent value="travel">
-                    <TravelHistory />
-                </TabsContent>
-            </Tabs>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+           <FamilyHistory />
+           <TravelHistory />
         </div>
     )
 }

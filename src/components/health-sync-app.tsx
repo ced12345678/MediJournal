@@ -18,7 +18,7 @@ import {
   Menu,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import TimelineView, { type TimelineEvent } from './timeline-view';
+import TimelineView from './timeline-view';
 import HospitalSharing from './hospital-sharing';
 import History from './history';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
@@ -32,6 +32,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { useTheme } from 'next-themes';
 import { Badge } from './ui/badge';
 import { AddEventForm } from './add-event-form';
+import { cn } from '@/lib/utils';
 
 const navItems = [
   { id: 'timeline', label: 'Life', icon: Sparkle },
@@ -42,37 +43,37 @@ const navItems = [
   { id: 'sharing', label: 'Hospital Sharing', icon: Share2 },
 ];
 
-export type NavItem = typeof navItems[number];
+export type NavItem = typeof navItems[number] | {id: 'account', label: 'Account', icon: typeof User };
 
 function DoctorVisits({ events, onAddEvent }: { events: TimelineEvent[], onAddEvent: (event: Omit<TimelineEvent, 'id'> | Omit<TimelineEvent, 'id'>[]) => void }) {
     const visits = events.filter(e => e.type === 'Doctor Visit').sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     return (
-        <div className="p-4 md:p-6 space-y-4">
-            <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold">Doctor Visits</h2>
+        <div className="space-y-6">
+            <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold text-foreground">Doctor Visits</h2>
                 <AddEventForm onAddEvent={onAddEvent} defaultEventType="Doctor Visit" hideAgeInput={true}>
                     <Button>Add Visit</Button>
                 </AddEventForm>
             </div>
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-6">
                 {visits.map(visit => (
-                    <Card key={visit.id}>
+                    <Card key={visit.id} className="transform transition-all duration-300 hover:scale-[1.02] hover:shadow-xl">
                         <CardHeader>
                             <div className="flex justify-between items-start">
                                 <div>
-                                    <CardTitle>{visit.title}</CardTitle>
+                                    <CardTitle className="text-lg">{visit.title}</CardTitle>
                                     <CardDescription>{new Date(visit.date).toLocaleDateString()} (Age {visit.age})</CardDescription>
                                 </div>
                                 {visit.details?.visitType && <Badge variant={visit.details.visitType === 'Serious Visit' ? 'destructive' : 'secondary'}>{visit.details.visitType}</Badge>}
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-sm">{visit.description}</p>
+                            <p className="text-sm text-muted-foreground">{visit.description}</p>
                             {visit.details?.visitType === 'Serious Visit' && (
                                 <div className="mt-4 space-y-2 text-sm border-t pt-4">
-                                    {visit.details.diseaseName && <p><span className="font-semibold">Diagnosis:</span> {visit.details.diseaseName}</p>}
-                                    {visit.details.medicationsPrescribed && <p><span className="font-semibold">Prescription:</span> {visit.details.medicationsPrescribed}</p>}
+                                    {visit.details.diseaseName && <p><span className="font-semibold text-foreground">Diagnosis:</span> {visit.details.diseaseName}</p>}
+                                    {visit.details.medicationsPrescribed && <p><span className="font-semibold text-foreground">Prescription:</span> {visit.details.medicationsPrescribed}</p>}
                                 </div>
                             )}
                         </CardContent>
@@ -87,31 +88,33 @@ function Medication({ events, onAddEvent }: { events: TimelineEvent[], onAddEven
      const medications = events.filter(e => e.type === 'Medication').sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     return (
-        <div className="p-4 md:p-6 space-y-4">
-            <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold">Medication</h2>
+        <div className="space-y-6">
+            <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold text-foreground">Medication</h2>
                 <AddEventForm onAddEvent={onAddEvent} defaultEventType="Medication" hideAgeInput={true}>
                     <Button>Add Medication</Button>
                 </AddEventForm>
             </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {medications.map(med => (
-                <Card key={med.id}>
+                <Card key={med.id} className="transform transition-all duration-300 hover:scale-[1.02] hover:shadow-xl">
                     <CardHeader>
                         <div className="flex justify-between items-start">
                             <div>
-                                <CardTitle>{med.title}</CardTitle>
+                                <CardTitle className="text-lg">{med.title}</CardTitle>
                                 <CardDescription>Started: {new Date(med.date).toLocaleDateString()} (Age {med.age})</CardDescription>
                             </div>
-                            <Badge variant={med.details?.status === 'Active' ? 'default' : 'secondary'} className={med.details?.status === 'Active' ? 'bg-green-600' : ''}>
+                            <Badge variant={med.details?.status === 'Active' ? 'default' : 'secondary'} className={cn(med.details?.status === 'Active' ? 'bg-accent text-accent-foreground' : '')}>
                                 {med.details?.status || 'Stopped'}
                             </Badge>
                         </div>
                     </CardHeader>
                      <CardContent>
-                        <p className="text-sm">{med.description}</p>
+                        <p className="text-sm text-muted-foreground">{med.description}</p>
                     </CardContent>
                 </Card>
             ))}
+            </div>
         </div>
     );
 }
@@ -120,24 +123,26 @@ function Diseases({ events, onAddEvent }: { events: TimelineEvent[], onAddEvent:
     const diseases = events.filter(e => e.type === 'Disease').sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     return (
-        <div className="p-4 md:p-6 space-y-4">
-            <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold">Diseases</h2>
+        <div className="space-y-6">
+            <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold text-foreground">Diseases</h2>
                  <AddEventForm onAddEvent={onAddEvent} defaultEventType="Disease" hideAgeInput={true}>
                     <Button>Add Disease</Button>
                 </AddEventForm>
             </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {diseases.map(disease => (
-                <Card key={disease.id}>
+                <Card key={disease.id} className="transform transition-all duration-300 hover:scale-[1.02] hover:shadow-xl">
                     <CardHeader>
-                        <CardTitle>{disease.title}</CardTitle>
+                        <CardTitle className="text-lg">{disease.title}</CardTitle>
                         <CardDescription>Diagnosed: {new Date(disease.date).toLocaleDateString()} (Age {disease.age})</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-sm">{disease.description}</p>
+                        <p className="text-sm text-muted-foreground">{disease.description}</p>
                     </CardContent>
                 </Card>
             ))}
+            </div>
         </div>
     );
 }
@@ -189,9 +194,9 @@ function AccountSection({ onNavigate }: { onNavigate: (item: NavItem) => void })
     if (!user) return null;
 
     return (
-        <div className="p-4 md:p-6">
-             <h2 className="text-2xl font-bold mb-6">Account Information</h2>
-            <Card>
+        <div className="space-y-6">
+             <h2 className="text-2xl font-bold text-foreground mb-6">Account Information</h2>
+            <Card className="transform transition-all duration-300 hover:shadow-xl">
                 <CardHeader>
                     <CardTitle>Your Profile</CardTitle>
                     <CardDescription>Manage your account settings. All your data is stored locally in this browser.</CardDescription>
@@ -199,7 +204,7 @@ function AccountSection({ onNavigate }: { onNavigate: (item: NavItem) => void })
                 <CardContent className="space-y-6">
                     <div className="space-y-2">
                         <Label>Username</Label>
-                        <p className="font-mono text-sm bg-muted p-2 rounded-md break-all">{user.username}</p>
+                        <p className="font-mono text-sm bg-muted p-3 rounded-lg break-all">{user.username}</p>
                     </div>
                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                          <div className="space-y-2">
@@ -247,30 +252,43 @@ function AccountSection({ onNavigate }: { onNavigate: (item: NavItem) => void })
     );
 }
 
-const AppHeader = ({ onNavigate }: { onNavigate: (item: NavItem) => void }) => {
+const AppHeader = ({ onNavigate, activeItem }: { onNavigate: (item: NavItem) => void; activeItem: NavItem; }) => {
     const { user, logout } = useAuth();
     const { setTheme } = useTheme();
 
     return (
-        <header className="flex items-center justify-between p-4 border-b bg-card">
-            <div className="flex items-center gap-4">
+        <header className="sticky top-0 z-40 flex items-center justify-between p-4 h-20 bg-card/80 backdrop-blur-sm border-b">
+            <div className="flex items-center gap-6">
                  <div className="flex items-center gap-2">
                     <HeartPulse className="h-8 w-8 text-primary" />
                     <h1 className="text-2xl font-bold text-foreground">HealthSync</h1>
                 </div>
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline">
-                           <Menu className="h-4 w-4 mr-2" />
-                            Sections
+                 <nav className="hidden md:flex items-center gap-2">
+                     {navItems.map(item => (
+                        <Button 
+                            key={item.id} 
+                            variant="ghost" 
+                            onClick={() => onNavigate(item)}
+                            className={cn(
+                                "text-muted-foreground transition-colors hover:text-foreground",
+                                activeItem.id === item.id && "text-foreground bg-primary/10"
+                            )}
+                        >
+                           <item.icon className="mr-2 h-4 w-4" />
+                            {item.label}
                         </Button>
+                    ))}
+                 </nav>
+            </div>
+             <div className="flex items-center gap-3">
+                 <DropdownMenu>
+                    <DropdownMenuTrigger asChild className="md:hidden">
+                         <Button variant="outline" size="icon">
+                            <Menu className="h-5 w-5" />
+                         </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start">
-                         <DropdownMenuLabel>
-                            Go To
-                        </DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        {navItems.map(item => (
+                    <DropdownMenuContent align="end">
+                         {navItems.map(item => (
                             <DropdownMenuItem key={item.id} onClick={() => onNavigate(item)}>
                                <item.icon className="mr-2 h-4 w-4" />
                                 <span>{item.label}</span>
@@ -278,12 +296,10 @@ const AppHeader = ({ onNavigate }: { onNavigate: (item: NavItem) => void }) => {
                         ))}
                     </DropdownMenuContent>
                 </DropdownMenu>
-            </div>
-             <div className="flex items-center gap-2">
                  <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                         <Button variant="ghost" size="icon">
-                            <User className="h-5 w-5" />
+                         <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+                            <User className="h-5 w-5 text-muted-foreground" />
                          </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
@@ -361,34 +377,71 @@ export default function HealthSyncApp() {
   }
   
   const renderContent = () => {
+    let content;
     switch (activeItem.id) {
       case 'timeline':
-        return <TimelineView events={timelineEvents} onAddEvent={addEvent} />;
+        content = <TimelineView events={timelineEvents} onAddEvent={addEvent} />;
+        break;
       case 'visits':
-        return <DoctorVisits events={timelineEvents} onAddEvent={addEvent} />;
+        content = <DoctorVisits events={timelineEvents} onAddEvent={addEvent} />;
+        break;
       case 'medication':
-        return <Medication events={timelineEvents} onAddEvent={addEvent} />;
+        content = <Medication events={timelineEvents} onAddEvent={addEvent} />;
+        break;
       case 'diseases':
-        return <Diseases events={timelineEvents} onAddEvent={addEvent} />;
+        content = <Diseases events={timelineEvents} onAddEvent={addEvent} />;
+        break;
       case 'history':
-        return <History />;
+        content = <History />;
+        break;
       case 'account':
-        return <AccountSection onNavigate={setActiveItem} />;
+        content = <AccountSection onNavigate={setActiveItem} />;
+        break;
       case 'sharing':
-        return <HospitalSharing />;
+        content = <HospitalSharing />;
+        break;
       default:
-        return <TimelineView events={timelineEvents} onAddEvent={addEvent} />;
+        content = <TimelineView events={timelineEvents} onAddEvent={addEvent} />;
+        break;
     }
+    return <div key={activeItem.id} className="animate-in fade-in-50 duration-500">{content}</div>;
   };
 
   return (
     <div className="flex flex-col h-screen bg-background text-foreground">
-        <AppHeader onNavigate={setActiveItem} />
-        <main className="flex-1 overflow-y-auto">
-            {renderContent()}
+        <AppHeader onNavigate={setActiveItem} activeItem={activeItem} />
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+            <div className="max-w-7xl mx-auto">
+             {renderContent()}
+            </div>
         </main>
     </div>
   );
 }
 
+export type TimelineEvent = {
+  id: string;
+  age: number;
+  date: string;
+  title: string;
+  description: string;
+  type: EventType;
+  details?: {
+    status?: 'Active' | 'Stopped';
+    visitType?: 'Casual Visit' | 'Serious Visit';
+    diseaseName?: string;
+    medicationsPrescribed?: string;
+  }
+};
+
+export const eventIcons = {
+  Vaccination: Syringe,
+  Medication: Pill,
+  'Doctor Visit': Stethoscope,
+  Disease: Biohazard,
+  Other: HeartPulse
+};
+
+export const eventTypes = Object.keys(eventIcons);
+export type EventType = keyof typeof eventIcons;
     

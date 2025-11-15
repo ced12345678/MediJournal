@@ -39,12 +39,14 @@ export default function SignupPage() {
 
   if (generatedUsername) {
     return (
-        <div className="flex items-center justify-center min-h-screen bg-secondary/50">
-            <Card className="mx-auto max-w-sm w-full">
-                 <CardHeader className="text-center">
-                    <div className="flex items-center justify-center gap-2 mb-4">
-                        <HeartPulse className="h-10 w-10 text-primary" />
-                        <h1 className="text-3xl font-bold text-foreground">HealthSync</h1>
+        <div className="flex items-center justify-center min-h-screen bg-background dark:bg-card">
+            <Card className="mx-auto max-w-sm w-full shadow-2xl">
+                 <CardHeader className="text-center space-y-4">
+                    <div className="flex flex-col items-center justify-center gap-2 mb-2">
+                        <div className="p-3 bg-primary/10 rounded-full">
+                            <HeartPulse className="h-10 w-10 text-primary" />
+                        </div>
+                         <h1 className="text-3xl font-bold text-foreground">HealthSync</h1>
                     </div>
                     <CardTitle className="text-2xl">Account Created!</CardTitle>
                     <CardDescription>
@@ -53,7 +55,7 @@ export default function SignupPage() {
                 </CardHeader>
                 <CardContent className="text-center space-y-4">
                     <p>Your auto-generated username is:</p>
-                    <p className="font-mono text-lg bg-muted p-2 rounded-md">{generatedUsername}</p>
+                    <p className="font-mono text-lg bg-muted p-3 rounded-lg">{generatedUsername}</p>
                     <p className="text-muted-foreground text-sm">Please save this username. You will need it to log in.</p>
                 </CardContent>
                 <CardFooter>
@@ -67,11 +69,13 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-secondary/50">
-        <Card className="mx-auto max-w-sm w-full">
-            <CardHeader className="text-center">
-                <div className="flex items-center justify-center gap-2 mb-4">
-                    <HeartPulse className="h-10 w-10 text-primary" />
+    <div className="flex items-center justify-center min-h-screen bg-background dark:bg-card">
+        <Card className="mx-auto max-w-sm w-full shadow-2xl">
+            <CardHeader className="text-center space-y-4">
+                <div className="flex flex-col items-center justify-center gap-2 mb-2">
+                    <div className="p-3 bg-primary/10 rounded-full">
+                        <HeartPulse className="h-10 w-10 text-primary" />
+                    </div>
                     <h1 className="text-3xl font-bold text-foreground">HealthSync</h1>
                 </div>
                 <CardTitle className="text-2xl">Sign Up</CardTitle>
@@ -107,13 +111,13 @@ export default function SignupPage() {
                             <AlertDescription>{error}</AlertDescription>
                         </Alert>
                     )}
-                <Button type="submit" className="w-full">
+                <Button type="submit" className="w-full mt-2">
                     Create an account
                 </Button>
                 </form>
                 <div className="mt-4 text-center text-sm">
                 Already have an account?{' '}
-                <Link href="/login" className="underline">
+                <Link href="/login" className="underline text-primary">
                     Login
                 </Link>
                 </div>

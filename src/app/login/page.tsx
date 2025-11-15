@@ -40,16 +40,18 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-secondary/50">
-        <Card className="mx-auto max-w-sm w-full">
-            <CardHeader className="text-center">
-                 <div className="flex items-center justify-center gap-2 mb-4">
-                    <HeartPulse className="h-10 w-10 text-primary" />
+    <div className="flex items-center justify-center min-h-screen bg-background dark:bg-card">
+        <Card className="mx-auto max-w-sm w-full shadow-2xl">
+            <CardHeader className="text-center space-y-4">
+                 <div className="flex flex-col items-center justify-center gap-2 mb-2">
+                    <div className="p-3 bg-primary/10 rounded-full">
+                        <HeartPulse className="h-10 w-10 text-primary" />
+                    </div>
                     <h1 className="text-3xl font-bold text-foreground">HealthSync</h1>
                 </div>
                 <CardTitle className="text-2xl">Login</CardTitle>
                 <CardDescription>
-                Enter your username below to login to your account
+                Enter your username to login to your account
                 </CardDescription>
             </CardHeader>
             <CardContent>
@@ -81,13 +83,13 @@ export default function LoginPage() {
                             <AlertDescription>{error}</AlertDescription>
                         </Alert>
                     )}
-                    <Button type="submit" className="w-full">
+                    <Button type="submit" className="w-full mt-2">
                         Login
                     </Button>
                 </form>
                 <div className="mt-4 text-center text-sm">
                 Don&apos;t have an account?{' '}
-                <Link href="/signup" className="underline">
+                <Link href="/signup" className="underline text-primary">
                     Sign up
                 </Link>
                 </div>
