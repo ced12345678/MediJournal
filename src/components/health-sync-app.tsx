@@ -269,10 +269,8 @@ const AppHeader = ({ onNavigate, activeItem }: { onNavigate: (item: NavItem) => 
                 
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="hidden md:flex items-center gap-2 text-muted-foreground">
+                        <Button variant="outline" size="icon" className="md:hidden">
                             <Menu className="h-5 w-5" />
-                            <span>Sections</span>
-                            <ChevronDown className="h-4 w-4" />
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="start">
@@ -288,7 +286,7 @@ const AppHeader = ({ onNavigate, activeItem }: { onNavigate: (item: NavItem) => 
             </div>
             <div className="flex items-center gap-3">
                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild className="md:hidden">
+                    <DropdownMenuTrigger asChild>
                         <Button variant="outline" size="icon">
                             <Menu className="h-5 w-5" />
                         </Button>
@@ -456,5 +454,7 @@ export const eventIcons = {
 
 export const eventTypes = Object.keys(eventIcons) as EventType[];
 export type EventType = keyof typeof eventIcons;
+
+    
 
     
