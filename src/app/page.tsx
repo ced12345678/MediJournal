@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import HealthSyncApp from '@/components/health-sync-app';
+import MediJournalApp from '@/components/health-sync-app';
 import { useAuth } from '@/hooks/use-auth';
 
 export default function Home() {
@@ -26,5 +26,5 @@ export default function Home() {
     );
   }
   
-  return <HealthSyncApp />;
+  return <MediJournalApp />;
 }

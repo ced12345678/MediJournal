@@ -46,7 +46,7 @@ export default function SignupPage() {
                         <div className="p-3 bg-primary/10 rounded-full">
                             <HeartPulse className="h-10 w-10 text-primary" />
                         </div>
-                         <h1 className="text-3xl font-bold text-foreground">HealthSync</h1>
+                         <h1 className="text-3xl font-bold text-foreground">MediJournal</h1>
                     </div>
                     <CardTitle className="text-2xl">Account Created!</CardTitle>
                     <CardDescription>
@@ -76,7 +76,7 @@ export default function SignupPage() {
                     <div className="p-3 bg-primary/10 rounded-full">
                         <HeartPulse className="h-10 w-10 text-primary" />
                     </div>
-                    <h1 className="text-3xl font-bold text-foreground">HealthSync</h1>
+                    <h1 className="text-3xl font-bold text-foreground">MediJournal</h1>
                 </div>
                 <CardTitle className="text-2xl">Sign Up</CardTitle>
                 <CardDescription>

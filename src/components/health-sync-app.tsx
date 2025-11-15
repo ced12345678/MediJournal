@@ -183,7 +183,7 @@ function AccountSection({ onNavigate }: { onNavigate: (item: NavItem) => void })
     const handleDelete = () => {
       if (!user) return;
       Object.keys(localStorage).forEach(key => {
-        if (key.startsWith(`healthsync-${user.id}-`)) {
+        if (key.startsWith(`medijournal-${user.id}-`)) {
           localStorage.removeItem(key);
         }
       });
@@ -262,7 +262,7 @@ const AppHeader = ({ onNavigate, activeItem }: { onNavigate: (item: NavItem) => 
         <header className="sticky top-0 z-40 flex items-center justify-between px-4 md:px-6 h-20 bg-card text-card-foreground border-b">
             <div className="flex items-center gap-2">
                 <HeartPulse className="h-8 w-8 text-primary" />
-                <h1 className="text-2xl font-bold">HealthSync</h1>
+                <h1 className="text-2xl font-bold">MediJournal</h1>
             </div>
             <div className="flex items-center gap-2">
                 <DropdownMenu>
@@ -329,7 +329,7 @@ const AppHeader = ({ onNavigate, activeItem }: { onNavigate: (item: NavItem) => 
 };
 
 
-export default function HealthSyncApp() {
+export default function MediJournalApp() {
   const { user } = useAuth();
   const [activeItem, setActiveItem] = useState<NavItem>(navItems[0]);
   const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);

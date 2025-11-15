@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 
-const APP_PREFIX = 'healthsync-';
+const APP_PREFIX = 'medijournal-';
 const USERS_KEY = `${APP_PREFIX}users`;
 const SESSION_KEY = `${APP_PREFIX}session`;
 

@@ -1,6 +1,6 @@
-# Firebase Studio - HealthSync
+# Firebase Studio - MediJournal
 
-This is a Next.js starter app called HealthSync. It's a personal health companion that helps you track your medical history.
+This is a Next.js starter app called MediJournal. It's a personal health companion that helps you track your medical history.
 
 ## Features
 
@@ -51,4 +51,3 @@ This application is set up for easy deployment with **Firebase App Hosting**.
 After the deployment finishes, the CLI will provide you with the URL to your live application.
 
 For more details, see the [Firebase App Hosting documentation](https://firebase.google.com/docs/hosting/frameworks/nextjs).
-

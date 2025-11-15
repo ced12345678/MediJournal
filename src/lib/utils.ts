@@ -6,5 +6,5 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function getNamespacedKey(key: string, userId: string) {
-    return `healthsync-${userId}-${key}`;
+    return `medijournal-${userId}-${key}`;
 }
