@@ -14,12 +14,12 @@ import { cn } from '@/lib/utils';
 const TimelineItem = ({ event }: { event: TimelineEvent; }) => {
   const Icon = eventIcons[event.type] || HelpCircle;
   return (
-    <div className="relative pl-12 py-3 group animate-in fade-in-50 duration-500">
-      <div className="absolute left-5 top-0 h-full w-0.5 bg-border -translate-x-1/2" />
+    <div className="relative pl-8 py-3 group animate-in fade-in-50 duration-500">
+      <div className="absolute left-0 top-0 h-full w-0.5 bg-border -translate-x-1/2" />
       
-      <div className="absolute left-5 top-4 -translate-x-1/2 -translate-y-1/2">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/20 text-primary border-2 border-primary/30 transition-transform duration-300 group-hover:scale-110">
-          <Icon className="h-5 w-5" />
+      <div className="absolute left-0 top-4 -translate-x-1/2 -translate-y-1/2">
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-primary border-2 border-primary/30 transition-transform duration-300 group-hover:scale-110">
+          <Icon className="h-4 w-4" />
         </div>
       </div>
       
@@ -75,55 +75,69 @@ export default function TimelineView({ events, onAddEvent }: { events: TimelineE
   return (
     <div className="relative">
         <div className="max-w-4xl mx-auto">
-             <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-foreground">Your Life Story</h2>
-                 <AddEventForm onAddEvent={onAddEvent}>
-                    <Button>Add Event</Button>
-                </AddEventForm>
-            </div>
+             <header className="mb-8">
+                <div className="flex justify-between items-center">
+                    <h2 className="text-2xl font-bold tracking-tighter text-foreground">Your Life Story</h2>
+                    <AddEventForm onAddEvent={onAddEvent}>
+                        <Button>Add Event</Button>
+                    </AddEventForm>
+                </div>
+            </header>
             
             {sortedAges.length > 0 ? (
-                <Card>
-                    <CardContent className="p-6">
-                        <div className="relative">
-                            <div className="absolute left-5 top-0 h-full w-0.5 bg-border -translate-x-1/2" />
+                <div className="relative">
+                    {/* Central Timeline Line */}
+                    <div className="absolute left-1/2 top-0 h-full w-0.5 bg-border -translate-x-1/2" />
 
-                            {sortedAges.map(age => {
-                                const ageEvents = eventsByAge[age];
-                                if (!ageEvents || ageEvents.length === 0) return null;
-                                
-                                const isOpen = openAge === age;
+                    {sortedAges.map((age, index) => {
+                        const ageEvents = eventsByAge[age];
+                        if (!ageEvents || ageEvents.length === 0) return null;
+                        
+                        const isOpen = openAge === age;
+                        const isLeft = index % 2 === 0;
 
-                                return (
-                                   <Collapsible 
-                                        key={age} 
-                                        open={isOpen}
-                                        onOpenChange={() => setOpenAge(isOpen ? null : age)}
-                                        className="relative"
-                                    >
-                                        <div className="relative pl-12 py-6">
-                                            <CollapsibleTrigger asChild>
-                                                <div className="absolute left-5 top-1/2 -translate-x-1/2 -translate-y-1/2 cursor-pointer">
-                                                    <div className="flex h-10 w-10 items-center justify-center bg-secondary text-secondary-foreground border-2 border-border font-bold transition-transform duration-300 hover:scale-110">
-                                                        {age}
-                                                    </div>
-                                                </div>
-                                            </CollapsibleTrigger>
+                        return (
+                           <div key={age} className={cn("relative py-8", isLeft ? 'pr-[50%]' : 'pl-[50%]')}>
+                                <Collapsible 
+                                    open={isOpen}
+                                    onOpenChange={() => setOpenAge(isOpen ? null : age)}
+                                    className="relative"
+                                >
+                                    <CollapsibleTrigger asChild className="group">
+                                         <div className={cn(
+                                            "absolute top-1/2 -translate-y-1/2",
+                                            "flex items-center cursor-pointer",
+                                             isLeft ? "right-4 flex-row-reverse" : "left-4 flex-row"
+                                         )}>
+                                            <div className={cn(
+                                                "flex items-center justify-center bg-secondary text-secondary-foreground border-2 border-border font-bold text-2xl transition-transform duration-300 group-hover:scale-105",
+                                                "w-48 h-20" // 500% width, 200% height of original w-10 h-10
+                                            )}>
+                                                {age}
+                                            </div>
+                                            {/* Connector line from central bar to age box */}
+                                            <div className="w-4 h-0.5 bg-border"></div>
                                         </div>
-                                        
-                                        <CollapsibleContent>
-                                            <div className="pb-4">
+                                    </CollapsibleTrigger>
+                                    
+                                    <CollapsibleContent>
+                                        <div className={cn(
+                                            "pt-28", // Space below the age marker
+                                            isLeft ? 'pr-8' : 'pl-8'
+                                        )}>
+                                            <div className="relative p-6 bg-card rounded-lg border">
+                                                <h3 className="text-lg font-semibold mb-4">Events at Age {age}</h3>
                                                 {ageEvents.map((event) => (
                                                     <TimelineItem key={event.id} event={event} />
                                                 ))}
                                             </div>
-                                        </CollapsibleContent>
-                                   </Collapsible>
-                                )
-                            })}
-                        </div>
-                    </CardContent>
-                </Card>
+                                        </div>
+                                    </CollapsibleContent>
+                               </Collapsible>
+                           </div>
+                        )
+                    })}
+                </div>
             ) : (
                 <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm py-24 bg-card">
                     <div className="flex flex-col items-center gap-2 text-center">
