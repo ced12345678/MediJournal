@@ -13,7 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 import { Badge } from './ui/badge';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
-import { AddEventForm } from './health-sync-app';
+import { AddEventForm } from './add-event-form';
 
 export const eventIcons = {
   Vaccination: Syringe,
@@ -158,5 +158,3 @@ export default function TimelineView({ events, onAddEvent }: { events: TimelineE
     </div>
   );
 }
-
-    
