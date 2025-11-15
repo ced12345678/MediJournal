@@ -14,11 +14,21 @@ https://medi-journal1.vercel.app/
 - **Secure PDF Export**: Users can generate a comprehensive, shareable PDF summary of their health record to take to their doctor, ensuring they always have their information when they need it.
 - **100% Client-Side Prototype**: A fully featured hackathon demo that runs entirely in the browser with no backend server dependency, showcasing the potential for a privacy-first architecture.
 
-## Privacy & Data Storage
+## Privacy & Data Storage: From Prototype to Production
 
-For this hackathon prototype, **MediJournal uses the browser's local storage exclusively**. This is a deliberate design choice to demonstrate a 100% private, user-centric data model where the user has absolute control.
+**Prototype Model (Current Implementation):**
 
-In a real-world application, this model would be extended to use a secure, HIPAA-compliant database (like Google Cloud Firestore) where user data would be stored with end-to-end encryption and anonymization techniques to ensure absolute privacy and security at scale.
+For this hackathon prototype, **MediJournal uses the browser's `localStorage` exclusively**. This is a deliberate design choice to demonstrate a 100% private, user-centric data model where the user has absolute control. All data lives and dies on the user's device.
+
+**Production Model (The Future Vision):**
+
+In a real-world application, this model would evolve to use a secure, HIPAA-compliant database (like **Google Cloud Firestore**) while maintaining our privacy-first promise. Here’s how, in simple terms:
+
+1.  **De-Identified Data:** When a user signs up, their identity (e.g., email/password) is managed by a secure authentication service. The main application database, where health records are stored, would only know the user by a unique, anonymous ID (e.g., `user_7G5bX9pQ`). We would never store personal identifiers like names or emails alongside health data.
+
+2.  **End-to-End Encryption:** Before any health information leaves the user's device, it would be encrypted (scrambled) using a key that only the user's device holds. This data remains scrambled in transit and while stored in the database. Only when the user logs into their own account can the data be unscrambled for them to view.
+
+This "zero-knowledge" architecture means that even we, the creators of MediJournal, could not access or read our users' sensitive health information. This approach ensures absolute privacy and security at scale.
 
 ## Business Model: A Freemium Approach
 
