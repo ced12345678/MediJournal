@@ -1,8 +1,8 @@
 
 "use client";
 
-import React from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+import React, { useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { generateHealthTipsAction } from '@/lib/actions';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
@@ -96,7 +96,7 @@ export default function HealthTipsGenerator() {
     }, [user]);
 
     const initialState = { data: null, error: null };
-    const [state, formAction] = useFormState(generateHealthTipsAction, initialState);
+    const [state, formAction] = useActionState(generateHealthTipsAction, initialState);
 
     return (
         <Card className="transform transition-all duration-300 hover:shadow-xl">
