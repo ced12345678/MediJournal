@@ -12,7 +12,7 @@ import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { ScrollArea } from './ui/scroll-area';
-import { type TimelineEvent, type EventType, eventTypes } from './timeline-view';
+import { type TimelineEvent, type EventType, eventTypes } from './health-sync-app';
 
 export const AddEventForm = ({
   onAddEvent,
