@@ -17,7 +17,6 @@ import {
   Settings,
   Menu,
   Syringe,
-  ChevronDown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import TimelineView from './timeline-view';
@@ -52,14 +51,14 @@ function DoctorVisits({ events, onAddEvent }: { events: TimelineEvent[], onAddEv
     const visits = events.filter(e => e.type === 'Doctor Visit').sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-in fade-in-50 duration-500">
             <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-foreground">Doctor Visits</h2>
                 <AddEventForm onAddEvent={onAddEvent} defaultEventType="Doctor Visit" hideAgeInput={true}>
                     <Button>Add Visit</Button>
                 </AddEventForm>
             </div>
-            <div className="grid grid-cols-1 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {visits.map(visit => (
                     <Card key={visit.id} className="transform transition-all duration-300 hover:scale-[1.02] hover:shadow-xl">
                         <CardHeader>
@@ -91,14 +90,14 @@ function Medication({ events, onAddEvent }: { events: TimelineEvent[], onAddEven
      const medications = events.filter(e => e.type === 'Medication').sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-in fade-in-50 duration-500">
             <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-foreground">Medication</h2>
                 <AddEventForm onAddEvent={onAddEvent} defaultEventType="Medication" hideAgeInput={true}>
                     <Button>Add Medication</Button>
                 </AddEventForm>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {medications.map(med => (
                 <Card key={med.id} className="transform transition-all duration-300 hover:scale-[1.02] hover:shadow-xl">
                     <CardHeader>
@@ -126,14 +125,14 @@ function Diseases({ events, onAddEvent }: { events: TimelineEvent[], onAddEvent:
     const diseases = events.filter(e => e.type === 'Disease').sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-in fade-in-50 duration-500">
             <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-foreground">Diseases</h2>
                  <AddEventForm onAddEvent={onAddEvent} defaultEventType="Disease" hideAgeInput={true}>
                     <Button>Add Disease</Button>
                 </AddEventForm>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {diseases.map(disease => (
                 <Card key={disease.id} className="transform transition-all duration-300 hover:scale-[1.02] hover:shadow-xl">
                     <CardHeader>
@@ -197,7 +196,7 @@ function AccountSection({ onNavigate }: { onNavigate: (item: NavItem) => void })
     if (!user) return null;
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-in fade-in-50 duration-500">
              <h2 className="text-2xl font-bold text-foreground mb-6">Account Information</h2>
             <Card className="transform transition-all duration-300 hover:shadow-xl">
                 <CardHeader>
@@ -260,16 +259,11 @@ const AppHeader = ({ onNavigate, activeItem }: { onNavigate: (item: NavItem) => 
     const { setTheme } = useTheme();
 
     return (
-        <header className="sticky top-0 z-40 flex items-center justify-between px-6 h-20 bg-background/95 backdrop-blur-sm border-b">
-            <div className="flex items-center gap-6">
-                <div className="flex items-center gap-2">
-                    <HeartPulse className="h-8 w-8 text-primary" />
-                    <h1 className="text-2xl font-bold text-foreground">HealthSync</h1>
-                </div>
-                
-                <DropdownMenu>
+        <header className="sticky top-0 z-40 flex items-center justify-between px-4 md:px-6 h-20 bg-card text-card-foreground border-b">
+            <div className="flex items-center gap-4">
+                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="icon" className="md:hidden">
+                        <Button variant="outline" size="icon">
                             <Menu className="h-5 w-5" />
                         </Button>
                     </DropdownMenuTrigger>
@@ -282,28 +276,16 @@ const AppHeader = ({ onNavigate, activeItem }: { onNavigate: (item: NavItem) => 
                         ))}
                     </DropdownMenuContent>
                 </DropdownMenu>
-
+                <div className="flex items-center gap-2">
+                    <HeartPulse className="h-8 w-8 text-primary" />
+                    <h1 className="text-2xl font-bold">HealthSync</h1>
+                </div>
             </div>
             <div className="flex items-center gap-3">
-                 <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="icon">
-                            <Menu className="h-5 w-5" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        {navItems.map(item => (
-                            <DropdownMenuItem key={item.id} onClick={() => onNavigate(item)}>
-                                <item.icon className="mr-2 h-4 w-4" />
-                                <span>{item.label}</span>
-                            </DropdownMenuItem>
-                        ))}
-                    </DropdownMenuContent>
-                </DropdownMenu>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="relative h-9 w-9 rounded-full">
-                            <User className="h-5 w-5 text-muted-foreground" />
+                        <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                            <User className="h-6 w-6 text-card-foreground" />
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
@@ -370,7 +352,7 @@ export default function HealthSyncApp() {
   }, [user]);
 
   useEffect(() => {
-    if (timelineEvents.length > 0 && user) {
+    if (user) {
         localStorage.setItem(getNamespacedKey('timeline', user.id), JSON.stringify(timelineEvents));
     }
   }, [timelineEvents, user]);
@@ -383,7 +365,6 @@ export default function HealthSyncApp() {
 
     const updatedEvents = [...timelineEvents, ...newEvents]
     setTimelineEvents(updatedEvents);
-    localStorage.setItem(getNamespacedKey('timeline', user.id), JSON.stringify(updatedEvents));
   }
   
   const renderContent = () => {
@@ -414,13 +395,13 @@ export default function HealthSyncApp() {
         content = <TimelineView events={timelineEvents} onAddEvent={addEvent} />;
         break;
     }
-    return <div key={activeItem.id} className="animate-in fade-in-50 duration-500">{content}</div>;
+    return <div key={activeItem.id}>{content}</div>;
   };
 
   return (
-    <div className="flex flex-col h-screen bg-background text-foreground">
+    <div className="flex flex-col min-h-screen bg-background text-foreground">
         <AppHeader onNavigate={setActiveItem} activeItem={activeItem} />
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+        <main className="flex-1 p-4 md:p-6 lg:p-8">
             <div className="max-w-7xl mx-auto">
              {renderContent()}
             </div>
@@ -454,7 +435,5 @@ export const eventIcons = {
 
 export const eventTypes = Object.keys(eventIcons) as EventType[];
 export type EventType = keyof typeof eventIcons;
-
-    
 
     
