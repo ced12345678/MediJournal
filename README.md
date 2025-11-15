@@ -30,26 +30,45 @@ In a real-world application, this model would evolve to use a secure, HIPAA-comp
 
 This "zero-knowledge" architecture means that even we, the creators of MediJournal, could not access or read our users' sensitive health information. This approach ensures absolute privacy and security at scale.
 
-## Business Model: The Sponsored Wellness Platform
+## Business Model: A Freemium Approach to Building Trust and Revenue
 
-Instead of charging users directly, this model focuses on a Business-to-Business-to-Consumer (B2B2C) strategy where organizations sponsor MediJournal for their members. This keeps the app free for the end-user, maximizing adoption and aligning with our privacy-first mission.
+Our monetization strategy is designed to build trust and align with our privacy-first philosophy. We will **never sell user data or rely on advertising**. Instead, we will use a freemium model.
 
-### Primary Target Customers (The Sponsors)
+### Market Opportunity & Research
 
-*   **Corporate Employers:** Companies invest heavily in corporate wellness to increase productivity and reduce health insurance premiums. MediJournal is a high-value benefit that empowers employees to manage their health proactively.
-*   **Health Insurance Providers & Hospitals:** These institutions benefit from a more engaged patient population. An organized health record leads to better preventative care, more efficient consultations, and improved health outcomes, ultimately lowering costs.
+*   **Target Market:** Our primary market is the **6 in 10 U.S. adults with chronic conditions** and the **53 million unpaid caregivers** who manage their health. These users have a critical need for organized, shareable health records.
+*   **Market Gap:** While competitors like Apple Health or MyChart exist, they are either tied to a specific ecosystem or healthcare provider. MediJournal's key differentiator is its **privacy-first, "zero-knowledge" architecture** and its unique, intuitive lifetime timeline view.
+*   **Market Trend:** The digital health market is projected to exceed $660B by 2026. Patients are demanding more control over their data, creating the perfect entry point for a privacy-focused solution like MediJournal.
 
-### The Value Proposition
+### Tier 1: MediJournal Core (Free)
 
-Sponsors pay a subscription fee (e.g., per member, per month) to provide their population with free access to "MediJournal Plus" and all its premium features. The sponsor's value comes from a healthier, more proactive user base.
+The free tier is our user acquisition engine, designed to provide immense value and build a foundation of trust.
 
-Critically, the sponsoring organization **never** gets access to any individual's personal health data. Their ROI is measured in engagement metrics and the long-term benefits of improved population health, not surveillance. This model maintains perfect alignment between user privacy and business success.
+*   **Features:** Unlimited manual timeline entries, secure cloud storage for data sync across devices, and standard PDF health exports.
+*   **Goal:** Attract a large user base and establish MediJournal as the most trusted tool for personal health management.
 
-### Tier for Corporations and Hospitals
+### Tier 2: MediJournal Plus (Premium Subscription)
 
-We will offer a specialized "MediJournal for Enterprise" tier. This allows organizations to sponsor "MediJournal Plus" for their employees or patients as a premium health benefit. This model provides:
+This is our primary revenue driver, offered at a competitive subscription fee. The premium tier is for users who want to move from simply *recording* data to actively *understanding* and *optimizing* their health.
 
-*   **For Corporations:** A powerful tool to boost employee wellness, productivity, and potentially reduce group health insurance costs.
-*   **For Hospitals & Insurers:** A platform to drive patient engagement, improve health outcomes, and enable more efficient care by providing doctors with well-organized patient data.
+*   **Premium Features:**
+    *   **Advanced AI Insights:** Proactive analysis of a user's timeline to find trends, potential drug interactions, and generate personalized questions for doctors.
+    *   **Automated Data Sync:** Integration with wearables (Apple Watch, Fitbit) and patient portals to automatically import health data.
+    *   **Customizable Reporting:** Filterable reports for specific needs (e.g., a 5-year cardiology history).
+    *   **Family Accounts:** Manage records for dependents under a single subscription. Linking Based on family.
+    *   **Corporate Accounts:** Major Corporation Need to know about the health of their employees, to manage sick leave, ensure workplace safety and maintaining health benefits.
+    *   **Hospital Accounts:** Hospital accounts can instantly obtain the relevant information about the individuals and display in any required format, proper connection of necessary documents to doctors seemlessly.
 
-Sponsoring organizations would **never** have access to individual health data, receiving only anonymized, high-level adoption and usage metrics.
+
+    ### Techstack
+
+    TypeScript: type safety, more stable, checks for incomplete input, 
+
+    Next.js:  production-grade React framework, file-system based routing, Manages Rendering Environments
+    Not React : routing and performance optimizations that need to be manually configured with plain React.
+
+    App Router: URLs based on the folders, static UI is rendered on the server for faster page loads, and interactive elements run on the client
+
+    ShadCN UI : provides pre-designed, maximum flexibility and control
+
+    Tailwind CSS: no need for custom CSS, enforces consistency, faster, too difficult with bootstrap
