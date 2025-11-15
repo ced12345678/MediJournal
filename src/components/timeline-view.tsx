@@ -96,12 +96,9 @@ export default function TimelineView({ events, onAddEvent }: { events: TimelineE
                                         {/* Age Marker */}
                                         <div className="relative pl-12 py-6">
                                              <div className="absolute left-5 top-1/2 -translate-x-1/2 -translate-y-1/2">
-                                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary text-secondary-foreground border-2 border-border font-bold">
+                                                <div className="flex h-10 w-10 items-center justify-center bg-secondary text-secondary-foreground border-2 border-border font-bold transition-transform duration-300 hover:scale-110">
                                                     {age}
                                                 </div>
-                                            </div>
-                                             <div className="ml-4">
-                                                <h3 className="font-bold text-xl text-foreground">Age {age}</h3>
                                             </div>
                                         </div>
 
