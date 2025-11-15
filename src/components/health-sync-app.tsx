@@ -60,7 +60,7 @@ function DoctorVisits({ events, onAddEvent }: { events: TimelineEvent[], onAddEv
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {visits.map(visit => (
-                    <Card key={visit.id} className="transform transition-all duration-300 hover:scale-[1.02] hover:shadow-xl">
+                    <Card key={visit.id} className="transform transition-all duration-300 hover:scale-[1.02] hover:shadow-xl bg-chart-1/10 border-chart-1/50">
                         <CardHeader>
                             <div className="flex justify-between items-start">
                                 <div>
@@ -99,7 +99,7 @@ function Medication({ events, onAddEvent }: { events: TimelineEvent[], onAddEven
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {medications.map(med => (
-                <Card key={med.id} className="transform transition-all duration-300 hover:scale-[1.02] hover:shadow-xl">
+                <Card key={med.id} className="transform transition-all duration-300 hover:scale-[1.02] hover:shadow-xl bg-chart-2/10 border-chart-2/50">
                     <CardHeader>
                         <div className="flex justify-between items-start">
                             <div>
@@ -134,7 +134,7 @@ function Diseases({ events, onAddEvent }: { events: TimelineEvent[], onAddEvent:
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {diseases.map(disease => (
-                <Card key={disease.id} className="transform transition-all duration-300 hover:scale-[1.02] hover:shadow-xl">
+                <Card key={disease.id} className="transform transition-all duration-300 hover:scale-[1.02] hover:shadow-xl bg-chart-4/10 border-chart-4/50">
                     <CardHeader>
                         <CardTitle className="text-lg">{disease.title}</CardTitle>
                         <CardDescription>Diagnosed: {new Date(disease.date).toLocaleDateString()} (Age {disease.age})</CardDescription>
@@ -434,5 +434,7 @@ export const eventIcons = {
 
 export const eventTypes = Object.keys(eventIcons) as EventType[];
 export type EventType = keyof typeof eventIcons;
+
+    
 
     
