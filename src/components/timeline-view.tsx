@@ -94,7 +94,10 @@ export default function TimelineView({ events, onAddEvent }: { events: TimelineE
                         if (!ageEvents || ageEvents.length === 0) return null;
                         
                         const isOpen = openAge === age;
-                        const isLeft = index % 2 === 0;
+                        
+                        // New zig-zag pattern: 3 right, 2 left, 2 right
+                        const patternIndex = index % 7;
+                        const isLeft = patternIndex >= 3 && patternIndex <= 4;
 
                         return (
                            <div key={age} className={cn("relative py-8", isLeft ? 'pr-[50%]' : 'pl-[50%]')}>
@@ -111,7 +114,7 @@ export default function TimelineView({ events, onAddEvent }: { events: TimelineE
                                          )}>
                                             <div className={cn(
                                                 "flex items-center justify-center bg-secondary text-secondary-foreground border-2 border-border font-bold text-2xl transition-transform duration-300 group-hover:scale-105",
-                                                "w-48 h-20" // 500% width, 200% height of original w-10 h-10
+                                                "w-48 h-20" 
                                             )}>
                                                 {age}
                                             </div>
