@@ -105,12 +105,12 @@ export default function TimelineView({ events, onAddEvent }: { events: TimelineE
                             center: 'left-1/2 -translate-x-1/2',
                             right: 'left-3/4 -translate-x-1/2',
                         };
-
+                        
                         let currentPosition: 'left' | 'center' | 'right' = 'center';
                         if (isLeft) currentPosition = 'left';
                         if (isCenter) currentPosition = 'center';
                         if (isRight) currentPosition = 'right';
-                        
+
                         return (
                            <div key={age} className="relative w-full h-48">
                                 <Collapsible 
@@ -126,11 +126,11 @@ export default function TimelineView({ events, onAddEvent }: { events: TimelineE
                                             {/* Connector line - only for left and right */}
                                             {!isCenter && (
                                                 <div className={cn(
-                                                    "w-8 h-0.5 bg-border",
+                                                    "w-20 h-0.5 bg-border",
                                                     isLeft ? 'order-last -mr-2' : 'order-first -ml-2'
                                                 )}></div>
                                             )}
-                                            <div className="flex items-center justify-center bg-secondary text-secondary-foreground border-2 border-border rounded-lg font-bold text-2xl h-20 flex-grow transition-transform duration-300 group-hover:scale-105">
+                                            <div className="flex items-center justify-center bg-secondary text-secondary-foreground border-2 border-border font-bold text-2xl h-20 w-40 transition-transform duration-300 group-hover:scale-105">
                                                 {age}
                                             </div>
                                         </div>
