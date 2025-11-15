@@ -16,6 +16,7 @@ import {
   Sun,
   Settings,
   Menu,
+  Syringe,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import TimelineView from './timeline-view';
@@ -33,6 +34,11 @@ import { useTheme } from 'next-themes';
 import { Badge } from './ui/badge';
 import { AddEventForm } from './add-event-form';
 import { cn } from '@/lib/utils';
+import { RadioGroup, RadioGroupItem } from './ui/radio-group';
+import { Textarea } from './ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { ScrollArea } from './ui/scroll-area';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from './ui/dialog';
 
 const navItems = [
   { id: 'timeline', label: 'Life', icon: Sparkle },
@@ -44,6 +50,7 @@ const navItems = [
 ];
 
 export type NavItem = typeof navItems[number] | {id: 'account', label: 'Account', icon: typeof User };
+
 
 function DoctorVisits({ events, onAddEvent }: { events: TimelineEvent[], onAddEvent: (event: Omit<TimelineEvent, 'id'> | Omit<TimelineEvent, 'id'>[]) => void }) {
     const visits = events.filter(e => e.type === 'Doctor Visit').sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -257,53 +264,53 @@ const AppHeader = ({ onNavigate, activeItem }: { onNavigate: (item: NavItem) => 
     const { setTheme } = useTheme();
 
     return (
-        <header className="sticky top-0 z-40 flex items-center justify-between p-4 h-20 bg-card/80 backdrop-blur-sm border-b">
+        <header className="sticky top-0 z-40 flex items-center justify-between px-6 h-20 bg-background/95 backdrop-blur-sm border-b">
             <div className="flex items-center gap-6">
-                 <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2">
                     <HeartPulse className="h-8 w-8 text-primary" />
                     <h1 className="text-2xl font-bold text-foreground">HealthSync</h1>
                 </div>
-                 <nav className="hidden md:flex items-center gap-2">
-                     {navItems.map(item => (
-                        <Button 
-                            key={item.id} 
-                            variant="ghost" 
+                <nav className="hidden md:flex items-center gap-2">
+                    {navItems.map(item => (
+                        <Button
+                            key={item.id}
+                            variant="ghost"
                             onClick={() => onNavigate(item)}
                             className={cn(
                                 "text-muted-foreground transition-colors hover:text-foreground",
                                 activeItem.id === item.id && "text-foreground bg-primary/10"
                             )}
                         >
-                           <item.icon className="mr-2 h-4 w-4" />
+                            <item.icon className="mr-2 h-4 w-4" />
                             {item.label}
                         </Button>
                     ))}
-                 </nav>
+                </nav>
             </div>
-             <div className="flex items-center gap-3">
-                 <DropdownMenu>
+            <div className="flex items-center gap-3">
+                <DropdownMenu>
                     <DropdownMenuTrigger asChild className="md:hidden">
-                         <Button variant="outline" size="icon">
+                        <Button variant="outline" size="icon">
                             <Menu className="h-5 w-5" />
-                         </Button>
+                        </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                         {navItems.map(item => (
+                        {navItems.map(item => (
                             <DropdownMenuItem key={item.id} onClick={() => onNavigate(item)}>
-                               <item.icon className="mr-2 h-4 w-4" />
+                                <item.icon className="mr-2 h-4 w-4" />
                                 <span>{item.label}</span>
                             </DropdownMenuItem>
                         ))}
                     </DropdownMenuContent>
                 </DropdownMenu>
-                 <DropdownMenu>
+                <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                         <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+                        <Button variant="ghost" className="relative h-9 w-9 rounded-full">
                             <User className="h-5 w-5 text-muted-foreground" />
-                         </Button>
+                        </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                         <DropdownMenuLabel>
+                        <DropdownMenuLabel>
                             {user?.name || 'My Account'}
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
@@ -311,7 +318,7 @@ const AppHeader = ({ onNavigate, activeItem }: { onNavigate: (item: NavItem) => 
                             <Settings className="mr-2 h-4 w-4" />
                             <span>Account Settings</span>
                         </DropdownMenuItem>
-                         <DropdownMenuSub>
+                        <DropdownMenuSub>
                             <DropdownMenuSubTrigger>
                                 <Sun className="h-4 w-4 mr-2 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
                                 <Moon className="absolute h-4 w-4 mr-2 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
@@ -319,22 +326,22 @@ const AppHeader = ({ onNavigate, activeItem }: { onNavigate: (item: NavItem) => 
                             </DropdownMenuSubTrigger>
                             <DropdownMenuPortal>
                                 <DropdownMenuSubContent>
-                                <DropdownMenuItem onClick={() => setTheme("light")}>
-                                    Light
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => setTheme("dark")}>
-                                    Dark
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => setTheme("system")}>
-                                    System
-                                </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => setTheme("light")}>
+                                        Light
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => setTheme("dark")}>
+                                        Dark
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => setTheme("system")}>
+                                        System
+                                    </DropdownMenuItem>
                                 </DropdownMenuSubContent>
                             </DropdownMenuPortal>
                         </DropdownMenuSub>
                         <DropdownMenuSeparator />
-                         <DropdownMenuItem onClick={logout}>
-                           <LogOut className="mr-2 h-4 w-4" />
-                           <span>Log out</span>
+                        <DropdownMenuItem onClick={logout}>
+                            <LogOut className="mr-2 h-4 w-4" />
+                            <span>Log out</span>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
@@ -442,6 +449,7 @@ export const eventIcons = {
   Other: HeartPulse
 };
 
-export const eventTypes = Object.keys(eventIcons);
+export const eventTypes = Object.keys(eventIcons) as EventType[];
 export type EventType = keyof typeof eventIcons;
+
     
